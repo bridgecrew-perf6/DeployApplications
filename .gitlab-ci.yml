@@ -1,0 +1,59 @@
+stages:
+  - deploy
+
+#deploy to demo:
+#  stage: deploy
+#  environment: demo
+#  script:
+#  - echo "Triggered"
+#
+#deploy to test:
+#  stage: deploy
+#  environment: test
+#  script:
+#  - echo "Triggered"
+#
+#deploy to development:
+#  stage: deploy
+#  environment: development
+#  script:
+#  - echo "Triggered"
+
+# Pipeline was triggered - check the branch
+test trigger:
+  stage: deploy
+  script:
+  - echo "Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH"
+  - echo "CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH"
+  - echo "CI_MERGE_REQUEST_SOURCE_BRANCH_SHA=$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA"
+  only:
+    variables:
+    - if $CI_PIPELINE_TRIGGERED == true
+
+#
+#patch demo:
+#  stage: deploy
+#  environment: demo
+#  script:
+#  - echo "Triggered"
+#  only:
+#    variables:
+#      - if $CI_PIPELINE_TRIGGERED == true
+#
+#patch test:
+#  stage: deploy
+#  environment: test
+#  script:
+#  - echo "Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH"
+
+#
+#patch development:
+#  stage: deploy
+#  environment: development
+#  script:
+#  - echo "Triggered"
+#patch development:
+#  stage: deploy
+#  environment: development
+#  script:
+#  - echo "Triggered"
