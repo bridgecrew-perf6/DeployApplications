@@ -1,5 +1,6 @@
 include:
-  remote: 'https://gitlab.com/gcp-solutions/hcls/claims-modernization/gitlab-ci/gitlab-ci-build-vars.yml'
+- project: 'gcp-solutions/hcls/claims-modernization/gitlab-ci'
+  file: 'gitlab-ci-build-vars.yml'
 
 stages:
   - deploy
