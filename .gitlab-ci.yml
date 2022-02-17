@@ -23,7 +23,7 @@ stages:
 patch:
   stage: deploy
   script:
-  - ls /builds/gcp-solutions/hcls/claims-modernization/gitlab-test-examples/applicationc/variables.env
+  - echo $EVA1
   - echo Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH
   - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
   - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA=$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
@@ -32,7 +32,11 @@ patch:
   - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
   rules:
   - if: $PIPELINE_TRIGGERED
-
+  needs:
+  - project: workspace/build
+    job: build
+    ref: master
+    artifacts: true
 deploy:
   stage: deploy
   script: echo ">>> $CI_PIPELINE_TRIGGERED"
