@@ -35,7 +35,7 @@ deploy:
 
 hello:
   stage: deploy
-  script: echo "$CI_PIPELINE_TRIGGERED"
+  script: echo ">>> $CI_PIPELINE_TRIGGERED"
 #
 #patch demo:
 #  stage: deploy
