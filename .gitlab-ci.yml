@@ -32,11 +32,7 @@ patch:
   - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
   rules:
   - if: $PIPELINE_TRIGGERED
-#  needs:
-#  - project: workspace/build
-#    job: build
-#    ref: master
-#    artifacts: true
+
 deploy:
   stage: deploy
   script: echo ">>> $CI_PIPELINE_TRIGGERED"
