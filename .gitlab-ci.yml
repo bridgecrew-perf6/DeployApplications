@@ -1,6 +1,6 @@
 include:
 - project: 'gcp-solutions/hcls/claims-modernization/gitlab-ci'
-  file: 'gitlab-ci-build-vars.yml'
+  file: '.gitlab-ci-build-vars.yml'
 
 stages:
   - deploy
