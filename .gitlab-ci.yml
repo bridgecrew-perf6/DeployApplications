@@ -29,6 +29,7 @@ test trigger:
   only:
     variables:
       - $CI_PIPELINE_TRIGGERED == "true"
+      
 #
 #patch demo:
 #  stage: deploy
