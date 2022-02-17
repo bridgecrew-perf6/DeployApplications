@@ -23,7 +23,7 @@ stages:
 patch:
   stage: deploy
   script:
-  - ls tmp/variables.txt
+  - ls $VARIABLES
   - echo Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH
   - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
   - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA=$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
