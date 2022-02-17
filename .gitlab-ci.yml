@@ -25,6 +25,7 @@ patch:
   script:
   - echo $VARIABLES_FILE
   - echo $TEST
+  - echo $TEST1
   - echo Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH
   - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
   - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA=$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
