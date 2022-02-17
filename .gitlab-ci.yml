@@ -1,3 +1,6 @@
+include:
+  remote: 'https://gitlab.com/gcp-solutions/hcls/claims-modernization/gitlab-ci/gitlab-ci-build-vars.yml'
+
 stages:
   - deploy
 
@@ -23,6 +26,7 @@ stages:
 patch:
   stage: deploy
   script:
+  - cat $VARIABLES_FILE
   - echo Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH
   - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
   - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA=$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
@@ -31,9 +35,6 @@ patch:
   - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
   rules:
   - if: $PIPELINE_TRIGGERED
-#  only:
-#    variables:
-#      - if $CI_PIPELINE_TRIGGERED == "true"
 
 deploy:
   stage: deploy
