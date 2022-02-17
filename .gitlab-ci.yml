@@ -23,6 +23,8 @@ stages:
 patch:
   stage: deploy
   script:
+  - echo TRIGGER_BRANCH = $TRIGGER_BRANCH
+  - echo COMMIT_BRANCH = $COMMIT_BRANCH
   - echo ENVIRONMENT = $ENVIRONMENT
   - echo UPSTREAM_BRANCH = $UPSTREAM_BRANCH
   - echo UPSTREAM_PROJECT_PATH = $UPSTREAM_PROJECT
@@ -34,12 +36,8 @@ patch:
   - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
   - echo CI_PIPELINE_TRIGGERED = $CI_PIPELINE_TRIGGERED
   - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
-  - |
-    if ENVIRONMENT == "demo"; then
-      IMAGE_TAG=
-    fi
-  rules:
-  - if: $PIPELINE_TRIGGERED
+#  rules:
+#  - if: $PIPELINE_TRIGGERED
 
 deploy:
   stage: deploy
