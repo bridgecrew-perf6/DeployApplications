@@ -20,7 +20,7 @@ stages:
 #  - echo "Triggered"
 
 # Pipeline was triggered - check the branch
-deploy:
+patch:
   stage: deploy
   script:
   - echo Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH
@@ -29,13 +29,13 @@ deploy:
   - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
   - echo CI_PIPELINE_TRIGGERED = $CI_PIPELINE_TRIGGERED
   - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
-#  rules:
-#  - if: $CI_PIPELINE_TRIGGERED
+  rules:
+  - if: $PIPELINE_TRIGGERED
 #  only:
 #    variables:
 #      - if $CI_PIPELINE_TRIGGERED == "true"
 
-hello:
+deploy:
   stage: deploy
   script: echo ">>> $CI_PIPELINE_TRIGGERED"
 #
