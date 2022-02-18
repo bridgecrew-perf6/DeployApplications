@@ -22,6 +22,7 @@ stages:
 # Pipeline was triggered - check the branch
 patch:
   stage: deploy
+  environment: __ENVIRONMENT__
   script:
   - echo ENVIRONMENT = $ENVIRONMENT
   - echo IMAGE = $IMAGE
