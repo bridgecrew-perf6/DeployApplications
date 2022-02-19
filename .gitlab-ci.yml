@@ -1,5 +1,5 @@
 variables:
-  KUBE_CONTEXT: gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env:development
+  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env:gitlab-agent"
   CLUSTER: development
   REGION: us-central1
 
@@ -9,6 +9,7 @@ stages:
 image: google/cloud-sdk
 
 .cluster_connect: &cluster_connect
+#TODO ADD checking ENIRONMENT variable exists and connect to cluster depending on it
 - kubectl config use-context $KUBE_CONTEXT
 - kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
 - kubectl config set-context --current --namespace=$NAMESPACE
@@ -21,6 +22,14 @@ image: google/cloud-sdk
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
 - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
 - kubectl get pods
+
+
+### DEMO CLUSTER
+
+### DEVELOPMENT CLUSTER
+
+### TEST CLUSTER
+
 
 #deploy to demo:
 #  stage: deploy
