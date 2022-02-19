@@ -1,5 +1,5 @@
 variables:
-  KUBE_CONTEXT: gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env/gke-deploy-env:development
+  KUBE_CONTEXT: gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env:development
   CLUSTER: development
   REGION: us-central1
 
@@ -7,12 +7,15 @@ stages:
   - deploy
 
 
-.cluster_connect: &cluster_patch
+.cluster_connect: &cluster_connect
 - kubectl config use-context $KUBE_CONTEXT
 - kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
 - kubectl config set-context --current --namespace=$NAMESPACE
 - kubectl config current-context
 - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
+- kubectl get pods
+
+.cluster_patch: &cluster_patch
 - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
 - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
@@ -53,14 +56,20 @@ patch:
     - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
     - echo CI_PIPELINE_TRIGGERED = $CI_PIPELINE_TRIGGERED
     - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
+    - *cluster_connect
     - *cluster_patch
-
-#  rules:
-#  - if: $PIPELINE_TRIGGERED
+  rules:
+  - if: $PIPELINE_TRIGGERED != 'true'
+    when: always
 
 deploy:
   stage: deploy
-  script: echo ">>> $CI_PIPELINE_TRIGGERED"
+  script:
+    - echo ">>> $CI_PIPELINE_TRIGGERED"
+    - *cluster_connect
+  rules:
+  - if: $PIPELINE_TRIGGERED != 'true'
+    when: always
 #
 #patch demo:
 #  stage: deploy
