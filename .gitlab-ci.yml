@@ -6,6 +6,7 @@ variables:
 stages:
   - deploy
 
+image: google/cloud-sdk
 
 .cluster_connect: &cluster_connect
 - kubectl config use-context $KUBE_CONTEXT
@@ -43,7 +44,6 @@ stages:
 patch:
   stage: deploy
   environment: __ENVIRONMENT__
-  image: google/cloud-sdk
   script:
     - echo ENVIRONMENT = $ENVIRONMENT
     - echo IMAGE = $IMAGE
