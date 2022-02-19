@@ -7,12 +7,16 @@ stages:
   - deploy
 
 
-.cluster_connect: &cluster_connect
+.cluster_connect: &cluster_patch
 - kubectl config use-context $KUBE_CONTEXT
 - kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
 - kubectl config set-context --current --namespace=$NAMESPACE
 - kubectl config current-context
 - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
+- kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
+- sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
+- kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
+- kubectl get pods
 
 #deploy to demo:
 #  stage: deploy
@@ -36,9 +40,7 @@ stages:
 patch:
   stage: deploy
   environment: __ENVIRONMENT__
-  image:
-    name: bitnami/kubectl:latest
-    entrypoint: [""]
+  image: google/cloud-sdk
   script:
     - echo ENVIRONMENT = $ENVIRONMENT
     - echo IMAGE = $IMAGE
@@ -51,11 +53,7 @@ patch:
     - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
     - echo CI_PIPELINE_TRIGGERED = $CI_PIPELINE_TRIGGERED
     - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
-    <<: *cluster_connect
-    - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
-    - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
-    - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
-    - kubectl get pods
+    - *cluster_patch
 
 #  rules:
 #  - if: $PIPELINE_TRIGGERED
