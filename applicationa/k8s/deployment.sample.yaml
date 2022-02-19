@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    application: a
+  name: a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: a
+  template:
+    metadata:
+      labels:
+        application: a
+    spec:
+      containers:
+      - image: __IMAGE_TAG__
+        name: a
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always

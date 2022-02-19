@@ -1,5 +1,18 @@
+variables:
+  KUBE_CONTEXT: gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env/gke-deploy-env:development
+  CLUSTER: development
+  REGION: us-central1
+
 stages:
   - deploy
+
+
+.cluster_connect: &cluster_connect
+- kubectl config use-context $KUBE_CONTEXT
+- kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
+- kubectl config set-context --current --namespace=$NAMESPACE
+- kubectl config current-context
+- gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
 
 #deploy to demo:
 #  stage: deploy
@@ -23,18 +36,27 @@ stages:
 patch:
   stage: deploy
   environment: __ENVIRONMENT__
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
   script:
-  - echo ENVIRONMENT = $ENVIRONMENT
-  - echo IMAGE = $IMAGE
-  - echo NAMESPACE = $NAMESPACE
-  - echo UPSTREAM_PROJECT_NAME = $UPSTREAM_PROJECT_NAME
-  - echo UPSTREAM_PROJECT_PATH = $UPSTREAM_PROJECT
-  - echo Patching image $IMAGE of application $UPSTREAM_PROJECT_NAME, using $ENVIRONMENT environment and $NAMESPACE namespace
-  - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
-  - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA = $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
-  - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
-  - echo CI_PIPELINE_TRIGGERED = $CI_PIPELINE_TRIGGERED
-  - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
+    - echo ENVIRONMENT = $ENVIRONMENT
+    - echo IMAGE = $IMAGE
+    - echo NAMESPACE = $NAMESPACE
+    - echo UPSTREAM_PROJECT_NAME = $UPSTREAM_PROJECT_NAME
+    - echo UPSTREAM_PROJECT_PATH = $UPSTREAM_PROJECT
+    - echo Patching image $IMAGE of application $UPSTREAM_PROJECT_NAME, using $ENVIRONMENT environment and $NAMESPACE namespace
+    - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
+    - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA = $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
+    - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
+    - echo CI_PIPELINE_TRIGGERED = $CI_PIPELINE_TRIGGERED
+    - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
+    <<: *cluster_connect
+    - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
+    - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
+    - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
+    - kubectl get pods
+
 #  rules:
 #  - if: $PIPELINE_TRIGGERED
 

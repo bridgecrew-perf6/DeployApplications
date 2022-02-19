@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: a
+  name: a-service
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "5001"
+      port: 5001
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: a
