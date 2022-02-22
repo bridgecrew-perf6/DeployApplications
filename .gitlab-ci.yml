@@ -1,6 +1,6 @@
 variables:
   KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent"
-  CLUSTER: gitlab
+  CLUSTER: development
   REGION: us-central1
   PROJECT_ID: gitlab-demo-342103
 
@@ -12,6 +12,7 @@ image: google/cloud-sdk
 .kube-context:
   before_script:
   - kubectl config view
+#  - cat $HOME/.kube/config
   - kubectl config get-contexts
   - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
   - kubectl config current-context
