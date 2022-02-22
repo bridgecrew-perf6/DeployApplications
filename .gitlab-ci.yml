@@ -68,17 +68,16 @@ patch:
     - *cluster_connect
     - *cluster_patch
   rules:
-  - if: $PIPELINE_TRIGGERED != 'true'
+  - if: $PIPELINE_TRIGGERED == 'true'
     when: always
 
 deploy:
   stage: deploy
   script:
-    - echo ">>> $CI_PIPELINE_TRIGGERED"
     - *cluster_connect
-  rules:
-  - if: $PIPELINE_TRIGGERED != 'true'
-    when: always
+#  rules:
+#  - if: $PIPELINE_TRIGGERED != 'true'
+#    when: always
 #
 #patch demo:
 #  stage: deploy
