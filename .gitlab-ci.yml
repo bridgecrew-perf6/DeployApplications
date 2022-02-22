@@ -25,8 +25,8 @@ image: google/cloud-sdk
 ##- gcloud container clusters get-credentials "$CLUSTER" --region="$REGION" --project "$PROJECT_ID"
 ##- kubectl config get-contexts
 ##- kubectl config use-context $KUBE_CONTEXT
-##- kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
-##- kubectl config set-context --current --namespace=$NAMESPACE
+##- kubectl get namespace "$KUBE_NAMESPACE" 2>/dev/null || kubectl create namespace "$KUBE_NAMESPACE"
+##- kubectl config set-context --current --namespace=$KUBE_NAMESPACE
 ##- kubectl config current-context
 #- gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
 #- kubectl get pods
@@ -35,10 +35,9 @@ image: google/cloud-sdk
 - echo "Patching image $IMAGE of application $APPLICATION"
 - if [ -n "$CI_COMMIT_BRANCH" ]; echo source branch is  $CI_COMMIT_BRANCH; fi
 - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; echo triggered my merge Request $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA; fi
-- if [ -n "$NAMESPACE" ]; then kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"; fi
-- kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$NAMESPACE"
+- kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
-- kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$NAMESPACE"
+- kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
 - kubectl get pods
 
 # Depends on GITLAB_AUTH - File defined inside Project Settings->CI/CD
@@ -47,13 +46,13 @@ image: google/cloud-sdk
 # cat $HOME/.docker/config.json
 .prepare_cluster: &prepare_cluster
   # Create Secret if not existing to PullImages from GitLab
-  - if [ -n "$NAMESPACE" ]; then kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"; fi
-  - kubectl get secrets --namespace=$NAMESPACE
+  - if [ -n "$KUBE_NAMESPACE" ]; then kubectl get namespace "$KUBE_NAMESPACE" 2>/dev/null || kubectl create namespace "$KUBE_NAMESPACE"; fi
+  - kubectl get secrets --namespace=$KUBE_NAMESPACE
   - |
-    if kubectl get secrets --namespace=$NAMESPACE | grep $SECRET; then
-      echo "$SECRET exists in namespace $NAMESPACE, skipping..."
+    if kubectl get secrets --namespace=$KUBE_NAMESPACE | grep $SECRET; then
+      echo "$SECRET exists in namespace $KUBE_NAMESPACE, skipping..."
     else
-      kubectl create secret generic $SECRET --from-file=.dockerconfigjson=${GITLAB_AUTH} --type=kubernetes.io/dockerconfigjson --namespace=$NAMESPACE
+      kubectl create secret generic $SECRET --from-file=.dockerconfigjson=${GITLAB_AUTH} --type=kubernetes.io/dockerconfigjson --namespace=$KUBE_NAMESPACE
     fi
 
 # Pipeline was triggered - check the branch
@@ -64,10 +63,10 @@ patch:
   script:
     - echo ENVIRONMENT = $ENVIRONMENT
     - echo IMAGE = $IMAGE
-    - echo NAMESPACE = $NAMESPACE
+    - echo KUBE_NAMESPACE = $NAMESPACE
     - echo UPSTREAM_PROJECT_NAME = $UPSTREAM_PROJECT_NAME
     - echo UPSTREAM_PROJECT_PATH = $UPSTREAM_PROJECT
-    - echo Patching image $IMAGE of application $UPSTREAM_PROJECT_NAME, using $ENVIRONMENT environment and $NAMESPACE namespace
+    - echo Patching image $IMAGE of application $UPSTREAM_PROJECT_NAME, using $ENVIRONMENT environment and $KUBE_NAMESPACE namespace
     - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
     - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA = $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
     - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
@@ -88,18 +87,18 @@ deploy:
   rules:
   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
     variables:
-      NAMESPACE: "demo"
+      KUBE_NAMESPACE: "demo"
       IMAGE_TAG: "released:latest"
   - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     variables:
-      NAMESPACE: "development"
+      KUBE_NAMESPACE: "development"
       IMAGE_TAG: "qa:latest"
   - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
     variables:
-      NAMESPACE: "test"
+      KUBE_NAMESPACE: "test"
       IMAGE_TAG: "mr:latest"
   script:
-    - echo $NAMESPACE
+    - echo $KUBE_NAMESPACE
     - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
     - kubectl get pods
@@ -111,6 +110,6 @@ deploy:
           APPLICATION=$(basename ${dir%*/})
           IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-          APPLICATION=$APPLICATION IMAGE=$IMAGE NAMESPACE=$NAMESPACE bash $APPLY
+          APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$KUBE_NAMESPACE bash $APPLY
       done
     - kubectl get all
