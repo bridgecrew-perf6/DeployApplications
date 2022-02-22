@@ -1,5 +1,5 @@
 variables:
-  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env:development"
+  KUBE_CONTEXT: $CI_PROJECT_NAMESPACE/gitlab-gke:gitlab-agent
   CLUSTER: development
   REGION: us-central1
 
