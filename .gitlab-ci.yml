@@ -1,6 +1,6 @@
 variables:
   KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent"
-  CLUSTER: development
+  CLUSTER: gitlab
   REGION: us-central1
   PROJECT_ID: gitlab-demo-342103
 
@@ -91,15 +91,16 @@ deploy:
     - kubectl config view
     - kubectl config current-context
     -  |
-      for dir in ${CI_PROJECT_DIR}/applications
+      for dir in ${CI_PROJECT_DIR}/applications/*/
       do
-          dir=${dir%*/}
-          echo "${dir##*/}"
-          echo ${CI_PROJECT_DIR}/applications/${dir##*/k8s}
-
+          APP=${dir%*/}
+          IMAGE="${CI_PROJECT_NAMESPACE}/${APP}/released:latest"
+          K8S="${CI_PROJECT_DIR}/applications/${APP}/k8s"
+          echo $IMAGE
+          echo $K8S
       done
-    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
-    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
+#    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
+#    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
     - kubectl get all
 
 #  rules:
