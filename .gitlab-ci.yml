@@ -12,7 +12,7 @@ image: google/cloud-sdk
 .kube-context:
   before_script:
   - kubectl config view
-  - kubectl config current-context
+  - kubectl config get-contexts
   - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
   - kubectl config current-context
 
