@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    application: a
-  name: a
+    application: applicationa
+  name: applicationa
 spec:
   replicas: 1
   selector:
     matchLabels:
-      application: a
+      application: applicationa
   template:
     metadata:
       labels:
-        application: a
+        application: applicationa
     spec:
       containers:
       - image: __IMAGE_TAG__
-        name: a
+        name: applicationa
         ports:
         - containerPort: 80
       imagePullSecrets:
