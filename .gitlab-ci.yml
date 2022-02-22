@@ -90,7 +90,7 @@ deploy:
     - kubectl get pods
     - kubectl config current-context
     -  |
-      for dir in ${CI_PROJECT_DI}/applications
+      for dir in ${CI_PROJECT_DIR}/applications
       do
           dir=${dir%*/}
           echo "${dir##*/}"
