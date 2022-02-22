@@ -88,13 +88,15 @@ deploy:
   extends: [.kube-context]
   script:
     - kubectl get pods
+    - kubectl config view
     - kubectl config current-context
     -  |
       for dir in ${CI_PROJECT_DIR}/applications
       do
           dir=${dir%*/}
           echo "${dir##*/}"
-          ls ${dir##*/k8s}
+          echo ${CI_PROJECT_DIR}/applications/${dir##*/k8s}
+
       done
     - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
     - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
