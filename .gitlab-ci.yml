@@ -4,6 +4,7 @@ variables:
   REGION: us-central1
   PROJECT_ID: gitlab-demo-342103
   NAMESPACE: development
+  SECRET: regcred
 
 stages:
   - deploy
@@ -12,23 +13,22 @@ image: google/cloud-sdk
 
 .kube-context:
   before_script:
-  - kubectl config view
-  - kubectl config get-contexts
+#  - kubectl config view
+#  - kubectl config get-contexts
   - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
   - kubectl config current-context
 
 
-.cluster_connect: &cluster_connect
-#TODO ADD checking ENIRONMENT variable exists and connect to cluster depending on it
-- gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
-#- gcloud container clusters get-credentials "$CLUSTER" --region="$REGION" --project "$PROJECT_ID"
-#- kubectl config get-contexts
-#- kubectl config use-context $KUBE_CONTEXT
-#- kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
-#- kubectl config set-context --current --namespace=$NAMESPACE
-#- kubectl config current-context
-- gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
-- kubectl get pods
+#.cluster_connect: &cluster_connect
+#- gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
+##- gcloud container clusters get-credentials "$CLUSTER" --region="$REGION" --project "$PROJECT_ID"
+##- kubectl config get-contexts
+##- kubectl config use-context $KUBE_CONTEXT
+##- kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
+##- kubectl config set-context --current --namespace=$NAMESPACE
+##- kubectl config current-context
+#- gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
+#- kubectl get pods
 
 .cluster_patch: &cluster_patch
 - echo "Patching image $IMAGE of application $APPLICATION"
@@ -40,12 +40,19 @@ image: google/cloud-sdk
 - kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$NAMESPACE"
 - kubectl get pods
 
-
-### DEMO CLUSTER
-
-### DEVELOPMENT CLUSTER
-
-### TEST CLUSTER
+# Depends on GITLAB_AUTH - File defined inside Project Settings->CI/CD
+# Generated using:
+# docker login -u <user_name> -p <gitlab_access_token> registry.gitlab.com
+# cat $HOME/.docker/config.json
+.prepare_cluster: &prepare_cluster
+  # Create Secret if not existing to PullImages from GitLab
+  - kubectl get secrets
+  - |
+    if kubectl get secrets --namespace=$NAMESPACE | grep $SECRET; then
+      echo "$SECRET exists in namespace $NAMESPACE, skipping..."
+    else
+      kubectl create secret generic $SECRET --from-file=.dockerconfigjson=${GITLAB_AUTH} --type=kubernetes.io/dockerconfigjson --namespace=$NAMESPACE
+    fi
 
 # Pipeline was triggered - check the branch
 patch:
@@ -65,11 +72,12 @@ patch:
     - echo CI_PIPELINE_TRIGGERED = $CI_PIPELINE_TRIGGERED
     - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
     - APPLICATION=$UPSTREAM_PROJECT_NAME
-    - *cluster_connect
+    - *prepare_cluster
     - *cluster_patch
   rules:
   - if: $PIPELINE_TRIGGERED == 'true'
     when: always
+
 
 
 deploy:
@@ -79,7 +87,17 @@ deploy:
   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
     variables:
       NAMESPACE: "demo"
+      IMAGE_TAG: "released:latest"
+  - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
+    variables:
+      NAMESPACE: "development"
+      IMAGE_TAG: "qa:latest"
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+    variables:
+      NAMESPACE: "test"
+      IMAGE_TAG: "mr:latest"
   script:
+    - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
     - kubectl get pods
     - kubectl config view
@@ -88,13 +106,9 @@ deploy:
     -  |
       for dir in ${CI_PROJECT_DIR}/applications/*/
       do
-          echo $dir
-          echo `pwd`
           APPLICATION=$(basename ${dir%*/})
-          IMAGE="${CI_PROJECT_NAMESPACE}/${APPLICATION}/released:latest"
+          IMAGE="${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
           APPLICATION=$APPLICATION IMAGE=$IMAGE NAMESPACE=$NAMESPACE bash $APPLY
       done
-#    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
-#    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
     - kubectl get all
