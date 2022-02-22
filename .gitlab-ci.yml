@@ -95,7 +95,6 @@ deploy:
           dir=${dir%*/}
           echo "${dir##*/}"
           ls ${dir##*/k8s}
-#          kubectl apply -f ${dir##*/k8s}
       done
     - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
     - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
