@@ -87,6 +87,8 @@ deploy:
   environment: $KUBE_NAMESPACE
   extends: [.kube-context]
   rules:
+  - if: $PIPELINE_TRIGGERED
+    when: never
   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
     variables:
       KUBE_NAMESPACE: "demo"
@@ -99,8 +101,6 @@ deploy:
     variables:
       KUBE_NAMESPACE: "test"
       IMAGE_TAG: "mr:latest"
-  - if: $PIPELINE_TRIGGERED
-    when: never
   script:
     - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
     - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
