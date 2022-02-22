@@ -79,6 +79,7 @@ deploy:
     variables:
       NAMESPACE: "demo"
   script:
+    - echo $CI_COMMIT_REF_NAME "interesting"
     - kubectl get pods
     - kubectl config view
     - kubectl config current-context
