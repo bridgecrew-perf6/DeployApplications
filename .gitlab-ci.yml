@@ -120,5 +120,5 @@ deploy:
       done
     - kubectl get all
     rules:
-      - if: $PIPELINE_TRIGGERED
-        when: never
+    - if: $PIPELINE_TRIGGERED
+      when: never
