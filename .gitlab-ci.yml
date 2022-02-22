@@ -3,6 +3,7 @@ variables:
   CLUSTER: development
   REGION: us-central1
   PROJECT_ID: gitlab-demo-342103
+  NAMESPACE: development
 
 stages:
   - deploy
@@ -88,6 +89,10 @@ patch:
 deploy:
   stage: deploy
   extends: [.kube-context]
+  rules:
+  - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+    variables:
+      NAMESPACE: "demo"
   script:
     - kubectl get pods
     - kubectl config view
@@ -98,6 +103,7 @@ deploy:
           APP=$(basename ${dir%*/})
           IMAGE="${CI_PROJECT_NAMESPACE}/${APP}/released:latest"
           APPLY="${CI_PROJECT_DIR}/applications/${APP}/gcp/apply.sh"
+          echo $APPLY
           APPLICATION=$APP IMAGE=$IMAGE NAMESPACE=development bash APPLY
       done
 #    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
