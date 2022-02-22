@@ -35,9 +35,10 @@ image: google/cloud-sdk
 - echo "Patching image $IMAGE of application $APPLICATION"
 - if [ -n "$CI_COMMIT_BRANCH" ]; then echo source branch is  $CI_COMMIT_BRANCH; fi
 - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then echo triggered my merge Request $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA; fi
-- kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
-- sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
-- kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
+- K8S=$CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s
+- kubectl apply -f $K8S/service.yaml --namespace="$KUBE_NAMESPACE"
+- sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $K8S/deployment.sample.yaml > $K8S/deployment.yaml
+- kubectl apply -f $K8S/deployment.yaml --namespace="$KUBE_NAMESPACE"
 - kubectl get svc $APPLICATION -n "$KUBE_NAMESPACE" 2>/dev/null || kubectl expose deployment $APPLICATION --port=5001 --target-port=80 -n "$KUBE_NAMESPACE" --type=LoadBalancer
 - kubectl get pods
 
