@@ -88,6 +88,8 @@ deploy:
     -  |
       for dir in ${CI_PROJECT_DIR}/applications/*/
       do
+          echo $dir
+          echo `pwd`
           APPLICATION=$(basename ${dir%*/})
           echo $APPLICATION
           IMAGE="${CI_PROJECT_NAMESPACE}/${APPLICATION}/released:latest"
