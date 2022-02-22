@@ -89,6 +89,7 @@ deploy:
       for dir in ${CI_PROJECT_DIR}/applications/*/
       do
           APPLICATION=$(basename ${dir%*/})
+          echo $APPLICATION
           IMAGE="${CI_PROJECT_NAMESPACE}/${APPLICATION}/released:latest"
           APPLY="${CI_PROJECT_DIR}/applications/${APP}/gcp/apply.sh"
           APPLICATION=$APPLICATION IMAGE=$IMAGE NAMESPACE=$NAMESPACE bash $APPLY
