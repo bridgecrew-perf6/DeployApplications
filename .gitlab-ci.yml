@@ -99,6 +99,8 @@ deploy:
     variables:
       KUBE_NAMESPACE: "test"
       IMAGE_TAG: "mr:latest"
+  - if: $PIPELINE_TRIGGERED
+    when: never
   script:
     - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
     - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
@@ -119,6 +121,3 @@ deploy:
           APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$KUBE_NAMESPACE bash $APPLY
       done
     - kubectl get all
-    rules:
-    - if: $PIPELINE_TRIGGERED
-      when: never
