@@ -97,9 +97,8 @@ deploy:
       do
           APP=$(basename ${dir%*/})
           IMAGE="${CI_PROJECT_NAMESPACE}/${APP}/released:latest"
-          K8S="${CI_PROJECT_DIR}/applications/${APP}/k8s"
-          echo $IMAGE
-          echo $K8S
+          APPLY="${CI_PROJECT_DIR}/applications/${APP}/gcp/apply.sh"
+          APPLICATION=$APP IMAGE=$IMAGE NAMESPACE=development bash APPLY
       done
 #    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
 #    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
