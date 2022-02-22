@@ -9,19 +9,24 @@ stages:
 
 image: google/cloud-sdk
 
+.kube-context:
+  before_script:
+  - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
+
 .cluster_connect: &cluster_connect
 #TODO ADD checking ENIRONMENT variable exists and connect to cluster depending on it
 - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
 #- gcloud container clusters get-credentials "$CLUSTER" --region="$REGION" --project "$PROJECT_ID"
-- kubectl config get-contexts
-- kubectl config use-context $KUBE_CONTEXT
-- kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
-- kubectl config set-context --current --namespace=$NAMESPACE
-- kubectl config current-context
+#- kubectl config get-contexts
+#- kubectl config use-context $KUBE_CONTEXT
+#- kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
+#- kubectl config set-context --current --namespace=$NAMESPACE
+#- kubectl config current-context
 - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
 - kubectl get pods
 
 .cluster_patch: &cluster_patch
+- if [ -n "$NAMESPACE" ]; then kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"; fi
 - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
 - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
@@ -57,6 +62,7 @@ image: google/cloud-sdk
 patch:
   stage: deploy
   environment: __ENVIRONMENT__
+  extends: [.kube-context]
   script:
     - echo ENVIRONMENT = $ENVIRONMENT
     - echo IMAGE = $IMAGE
@@ -77,8 +83,9 @@ patch:
 
 deploy:
   stage: deploy
+  extends: [.kube-context]
   script:
-    - *cluster_connect
+    - kubectl get pods
 #  rules:
 #  - if: $PIPELINE_TRIGGERED != 'true'
 #    when: always
