@@ -2,14 +2,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    application: a
-  name: a-service
+    application: applicationa
+  name: applicationa
 spec:
   ports:
   - port: 5001
     protocol: TCP
     targetPort: 80
   selector:
-    application: a
+    application: applicationa
   sessionAffinity: None
   type: LoadBalancer
