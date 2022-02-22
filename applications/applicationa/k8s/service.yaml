@@ -6,8 +6,7 @@ metadata:
   name: a-service
 spec:
   ports:
-  - nodePort: 30998
-    port: 5001
+  - port: 5001
     protocol: TCP
     targetPort: 80
   selector:
