@@ -1,5 +1,5 @@
 variables:
-  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env:gitlab-agent"
+  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent"
   CLUSTER: development
   REGION: us-central1
   PROJECT_ID: gitlab-demo-342103
@@ -14,7 +14,6 @@ image: google/cloud-sdk
 - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
 #- gcloud container clusters get-credentials "$CLUSTER" --region="$REGION" --project "$PROJECT_ID"
 - kubectl config get-contexts
-- kubectl config current-context
 - kubectl config use-context $KUBE_CONTEXT
 - kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
 - kubectl config set-context --current --namespace=$NAMESPACE
