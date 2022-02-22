@@ -2,6 +2,7 @@ variables:
   KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/pa-ref-impl/gke-deploy-env:gitlab-agent"
   CLUSTER: development
   REGION: us-central1
+  PROJECT_ID: gitlab-demo-342103
 
 stages:
   - deploy
