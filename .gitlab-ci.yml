@@ -77,7 +77,7 @@ patch:
     - *prepare_cluster
     - *cluster_patch
   rules:
-  - if: $PIPELINE_TRIGGERED == 'true'
+  - if: $PIPELINE_TRIGGERED
     when: always
 
 
@@ -99,7 +99,7 @@ deploy:
       KUBE_NAMESPACE: "test"
       IMAGE_TAG: "mr:latest"
   script:
-    - echo $KUBE_NAMESPACE
+    - echo $KUBE_NAMESPACE, $PIPELINE_TRIGGERED
     - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
     - kubectl get pods
