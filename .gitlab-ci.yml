@@ -119,6 +119,6 @@ deploy:
           APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$KUBE_NAMESPACE bash $APPLY
       done
     - kubectl get all
-#    rules:
-#      - if: $PIPELINE_TRIGGERED
-#        when: never
+    rules:
+      - if: $PIPELINE_TRIGGERED
+        when: never
