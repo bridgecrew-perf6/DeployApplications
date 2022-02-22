@@ -67,9 +67,10 @@ patch:
     - APPLICATION=$UPSTREAM_PROJECT_NAME
     - *cluster_connect
     - *cluster_patch
-  only:
-    variables:
-      - if $PIPELINE_TRIGGERED == "true"
+  rules:
+  - if: $PIPELINE_TRIGGERED == 'true'
+    when: always
+
 
 deploy:
   stage: deploy
