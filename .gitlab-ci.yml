@@ -40,7 +40,7 @@ image: google/cloud-sdk
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $K8S/deployment.sample.yaml > $K8S/deployment.yaml
 - kubectl apply -f $K8S/deployment.yaml --namespace="$KUBE_NAMESPACE"
 - kubectl get svc $APPLICATION -n "$KUBE_NAMESPACE" 2>/dev/null || kubectl expose deployment $APPLICATION --port=5001 --target-port=80 -n "$KUBE_NAMESPACE" --type=LoadBalancer
-- kubectl get pods
+- kubectl get pods -n "$KUBE_NAMESPACE"
 
 # Depends on GITLAB_AUTH - File defined inside Project Settings->CI/CD
 # Generated using:
@@ -111,7 +111,7 @@ deploy:
     - echo KUBE_NAMESPACE = $KUBE_NAMESPACE, PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
     - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
-    - kubectl get pods
+    - kubectl get pods -n "$KUBE_NAMESPACE"
     - kubectl config view
     - kubectl config current-context
     -  |
@@ -122,4 +122,4 @@ deploy:
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
           APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$KUBE_NAMESPACE bash $APPLY
       done
-    - kubectl get all
+    - kubectl get pods -n "$KUBE_NAMESPACE"
