@@ -65,10 +65,10 @@ patch:
   script:
     - echo ENVIRONMENT = $ENVIRONMENT
     - echo IMAGE = $IMAGE
-    - echo KUBE_NAMESPACE = $NAMESPACE
+    - echo NAMESPACE = $NAMESPACE
     - echo UPSTREAM_PROJECT_NAME = $UPSTREAM_PROJECT_NAME
     - echo UPSTREAM_PROJECT_PATH = $UPSTREAM_PROJECT
-    - echo Patching image $IMAGE of application $UPSTREAM_PROJECT_NAME, using $ENVIRONMENT environment and $KUBE_NAMESPACE namespace
+    - echo Patching image $IMAGE of application $UPSTREAM_PROJECT_NAME, using $ENVIRONMENT environment and $NAMESPACE namespace
     - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
     - echo CI_MERGE_REQUEST_SOURCE_BRANCH_SHA = $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA
     - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
@@ -85,22 +85,22 @@ patch:
 
 deploy:
   stage: deploy
-  environment: $KUBE_NAMESPACE
+  environment: $NAMESPACE
   extends: [.kube-context]
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
     variables:
-      KUBE_NAMESPACE: "demo"
+      NAMESPACE: "demo"
       IMAGE_TAG: "released:latest"
   - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     variables:
-      KUBE_NAMESPACE: "development"
+      NAMESPACE: "development"
       IMAGE_TAG: "qa:latest"
   - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
     variables:
-      KUBE_NAMESPACE: "test"
+      NAMESPACE: "test"
       IMAGE_TAG: "mr:latest"
   script:
     - echo PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
@@ -108,10 +108,10 @@ deploy:
     - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
     - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
     - echo CI_MERGE_REQUEST_TARGET_BRANCH_NAME = $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
-    - echo KUBE_NAMESPACE = $KUBE_NAMESPACE, PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
+    - echo NAMESPACE = $NAMESPACE, PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
     - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
-    - kubectl get pods -n "$KUBE_NAMESPACE"
+    - kubectl get pods -n "$NAMESPACE"
     - kubectl config view
     - kubectl config current-context
     -  |
@@ -120,6 +120,6 @@ deploy:
           APPLICATION=$(basename ${dir%*/})
           IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-          APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$KUBE_NAMESPACE bash $APPLY
+          APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
       done
-    - kubectl get pods -n "$KUBE_NAMESPACE"
+    - kubectl get pods -n "$NAMESPACE"
