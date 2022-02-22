@@ -1,5 +1,5 @@
 variables:
-  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent"
+  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   CLUSTER: development
   REGION: us-central1
   PROJECT_ID: gitlab-demo-342103
