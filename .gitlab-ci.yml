@@ -31,11 +31,11 @@ image: google/cloud-sdk
 #- gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
 #- kubectl get pods
 
-.cluster_patch: &cluster_patch
+.cluster_patch: &cluster_patch #TODO only patch Image
 - echo "Patching image $IMAGE of application $APPLICATION"
 - if [ -n "$CI_COMMIT_BRANCH" ]; then echo source branch is  $CI_COMMIT_BRANCH; fi
 - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then echo triggered my merge Request $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA; fi
-- kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
+- kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
 - kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
 - kubectl get svc $APPLICATION -n "$KUBE_NAMESPACE" 2>/dev/null || kubectl expose deployment $APPLICATION --port=5001 --target-port=80 -n "$KUBE_NAMESPACE" --type=LoadBalancer
@@ -59,7 +59,7 @@ image: google/cloud-sdk
 # Pipeline was triggered - check the branch
 patch:
   stage: deploy
-  environment: __ENVIRONMENT__
+  environment: $ENVIRONMENT
   extends: [.kube-context]
   script:
     - echo ENVIRONMENT = $ENVIRONMENT
@@ -84,6 +84,7 @@ patch:
 
 deploy:
   stage: deploy
+  environment: $KUBE_NAMESPACE
   extends: [.kube-context]
   rules:
   - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
@@ -99,7 +100,11 @@ deploy:
       KUBE_NAMESPACE: "test"
       IMAGE_TAG: "mr:latest"
   script:
-    - echo $KUBE_NAMESPACE, $PIPELINE_TRIGGERED
+    - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
+    - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
+    - echo CI_PIPELINE_SOURCE = $CI_PIPELINE_SOURCE
+    - echo CI_MERGE_REQUEST_TARGET_BRANCH_NAME = $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - echo KUBE_NAMESPACE = $KUBE_NAMESPACE, PIPELINE_TRIGGERED = $PIPELINE_TRIGGERED
     - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
     - kubectl get pods
@@ -114,3 +119,6 @@ deploy:
           APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$KUBE_NAMESPACE bash $APPLY
       done
     - kubectl get all
+#    rules:
+#      - if: $PIPELINE_TRIGGERED
+#        when: never
