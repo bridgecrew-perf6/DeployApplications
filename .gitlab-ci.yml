@@ -87,42 +87,11 @@ deploy:
     -  |
       for dir in ${CI_PROJECT_DIR}/applications/*/
       do
-          APP=$(basename ${dir%*/})
-          IMAGE="${CI_PROJECT_NAMESPACE}/${APP}/released:latest"
+          APPLICATION=$(basename ${dir%*/})
+          IMAGE="${CI_PROJECT_NAMESPACE}/${APPLICATION}/released:latest"
           APPLY="${CI_PROJECT_DIR}/applications/${APP}/gcp/apply.sh"
-          APPLICATION=$APP IMAGE=$IMAGE NAMESPACE=$NAMESPACE bash $APPLY
+          APPLICATION=$APPLICATION IMAGE=$IMAGE NAMESPACE=$NAMESPACE bash $APPLY
       done
 #    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
 #    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
     - kubectl get all
-
-#  rules:
-#  - if: $PIPELINE_TRIGGERED != 'true'
-#    when: always
-#
-#patch demo:
-#  stage: deploy
-#  environment: demo
-#  script:
-#  - echo "Triggered"
-#  only:
-#    variables:
-#      - if $CI_PIPELINE_TRIGGERED == true
-#
-#patch test:
-#  stage: deploy
-#  environment: test
-#  script:
-#  - echo "Patching image $IMAGE of application $APPLICATION, source branch is  $UPSTREAM_BRANCH"
-
-#
-#patch development:
-#  stage: deploy
-#  environment: development
-#  script:
-#  - echo "Triggered"
-#patch development:
-#  stage: deploy
-#  environment: development
-#  script:
-#  - echo "Triggered"
