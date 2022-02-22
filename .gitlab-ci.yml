@@ -13,6 +13,7 @@ image: google/cloud-sdk
   before_script:
   - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
 
+
 .cluster_connect: &cluster_connect
 #TODO ADD checking ENIRONMENT variable exists and connect to cluster depending on it
 - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
@@ -85,6 +86,9 @@ deploy:
   stage: deploy
   extends: [.kube-context]
   script:
+    - kubectl get pods
+    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
+    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
     - kubectl get pods
 #  rules:
 #  - if: $PIPELINE_TRIGGERED != 'true'
