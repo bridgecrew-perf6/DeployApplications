@@ -12,6 +12,7 @@ image: google/cloud-sdk
 .kube-context:
   before_script:
   - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
+  - kubectl config current-context
 
 
 .cluster_connect: &cluster_connect
@@ -87,9 +88,18 @@ deploy:
   extends: [.kube-context]
   script:
     - kubectl get pods
+    - kubectl config current-context
+    -  |
+      for dir in ${CI_PROJECT_DI}/applications
+      do
+          dir=${dir%*/}
+          echo "${dir##*/}"
+          ls ${dir##*/k8s}
+      done
     - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
     - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
     - kubectl get pods
+
 #  rules:
 #  - if: $PIPELINE_TRIGGERED != 'true'
 #    when: always
