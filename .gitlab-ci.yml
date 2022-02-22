@@ -11,9 +11,10 @@ image: google/cloud-sdk
 
 .cluster_connect: &cluster_connect
 #TODO ADD checking ENIRONMENT variable exists and connect to cluster depending on it
+- gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
 - gcloud container clusters get-credentials "$CLUSTER" --region="$REGION" --project "$PROJECT_ID"
 - kubectl config current-context
-#- kubectl config use-context $KUBE_CONTEXT
+- kubectl config use-context $KUBE_CONTEXT
 - kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
 - kubectl config set-context --current --namespace=$NAMESPACE
 - kubectl config current-context
