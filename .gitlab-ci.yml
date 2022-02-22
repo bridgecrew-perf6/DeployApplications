@@ -5,6 +5,7 @@ variables:
   PROJECT_ID: gitlab-demo-342103
   NAMESPACE: development
   SECRET: regcred
+  CONTAINER_REGISTRY: "registry.gitlab.com"
 
 stages:
   - deploy
@@ -46,6 +47,7 @@ image: google/cloud-sdk
 # cat $HOME/.docker/config.json
 .prepare_cluster: &prepare_cluster
   # Create Secret if not existing to PullImages from GitLab
+  - if [ -n "$NAMESPACE" ]; then kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"; fi
   - kubectl get secrets --namespace=$NAMESPACE
   - |
     if kubectl get secrets --namespace=$NAMESPACE | grep $SECRET; then
@@ -103,13 +105,12 @@ deploy:
     - kubectl get pods
     - kubectl config view
     - kubectl config current-context
-    - if [ -n "$NAMESPACE" ]; then kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"; fi
     -  |
       for dir in ${CI_PROJECT_DIR}/applications/*/
       do
           APPLICATION=$(basename ${dir%*/})
-          IMAGE="${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
+          IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
           APPLICATION=$APPLICATION IMAGE=$IMAGE NAMESPACE=$NAMESPACE bash $APPLY
-      done
+      donereg
     - kubectl get all
