@@ -99,8 +99,8 @@ deploy:
           echo $IMAGE
           echo $K8S
       done
-#    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
-#    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
+    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
+    - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
     - kubectl get all
 
 #  rules:
