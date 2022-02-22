@@ -31,7 +31,7 @@ image: google/cloud-sdk
 - if [ -n "$NAMESPACE" ]; then kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"; fi
 - kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/service.yaml --namespace="$KUBE_NAMESPACE"
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.sample.yaml > $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml
-- kubectl apply -f $CI_PROJECT_DIR/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
+- kubectl apply -f $CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s/deployment.yaml --namespace="$KUBE_NAMESPACE"
 - kubectl get pods
 
 
@@ -89,16 +89,18 @@ deploy:
   script:
     - kubectl get pods
     - kubectl config current-context
+    - ls ${CI_PROJECT_DIR}
     -  |
       for dir in ${CI_PROJECT_DIR}/applications
       do
           dir=${dir%*/}
           echo "${dir##*/}"
           ls ${dir##*/k8s}
+          #kubectl apply -f ${CI_PROJECT_DIR}/applications/${dir##*/k8s}/k8s
       done
     - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
     - gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
-    - kubectl get pods
+    - kubectl get all
 
 #  rules:
 #  - if: $PIPELINE_TRIGGERED != 'true'
