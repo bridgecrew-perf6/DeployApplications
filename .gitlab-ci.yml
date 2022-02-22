@@ -46,7 +46,7 @@ image: google/cloud-sdk
 # cat $HOME/.docker/config.json
 .prepare_cluster: &prepare_cluster
   # Create Secret if not existing to PullImages from GitLab
-  - kubectl get secrets
+  - kubectl get secrets --namespace=$NAMESPACE
   - |
     if kubectl get secrets --namespace=$NAMESPACE | grep $SECRET; then
       echo "$SECRET exists in namespace $NAMESPACE, skipping..."
@@ -97,6 +97,7 @@ deploy:
       NAMESPACE: "test"
       IMAGE_TAG: "mr:latest"
   script:
+    - echo $NAMESPACE
     - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
     - kubectl get pods
