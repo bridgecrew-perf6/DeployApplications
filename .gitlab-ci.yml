@@ -25,8 +25,8 @@ image: google/cloud-sdk
 ##- gcloud container clusters get-credentials "$CLUSTER" --region="$REGION" --project "$PROJECT_ID"
 ##- kubectl config get-contexts
 ##- kubectl config use-context $KUBE_CONTEXT
-##- kubectl get namespace "$KUBE_NAMESPACE" 2>/dev/null || kubectl create namespace "$KUBE_NAMESPACE"
-##- kubectl config set-context --current --namespace=$KUBE_NAMESPACE
+##- kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"
+##- kubectl config set-context --current --namespace=$NAMESPACE
 ##- kubectl config current-context
 #- gcloud --quiet container clusters get-credentials $CLUSTER --region $REGION
 #- kubectl get pods
@@ -36,11 +36,11 @@ image: google/cloud-sdk
 - if [ -n "$CI_COMMIT_BRANCH" ]; then echo source branch is  $CI_COMMIT_BRANCH; fi
 - if [ -n "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" ]; then echo triggered my merge Request $CI_MERGE_REQUEST_SOURCE_BRANCH_SHA; fi
 - K8S=$CI_PROJECT_DIR/applications/$UPSTREAM_PROJECT_NAME/k8s
-- kubectl apply -f $K8S/service.yaml --namespace="$KUBE_NAMESPACE"
+- kubectl apply -f $K8S/service.yaml --namespace="$NAMESPACE"
 - sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' $K8S/deployment.sample.yaml > $K8S/deployment.yaml
-- kubectl apply -f $K8S/deployment.yaml --namespace="$KUBE_NAMESPACE"
-- kubectl get svc $APPLICATION -n "$KUBE_NAMESPACE" 2>/dev/null || kubectl expose deployment $APPLICATION --port=5001 --target-port=80 -n "$KUBE_NAMESPACE" --type=LoadBalancer
-- kubectl get pods -n "$KUBE_NAMESPACE"
+- kubectl apply -f $K8S/deployment.yaml --namespace="$NAMESPACE"
+- kubectl get svc $APPLICATION -n "$NAMESPACE" 2>/dev/null || kubectl expose deployment $APPLICATION --port=5001 --target-port=80 -n "$NAMESPACE" --type=LoadBalancer
+- kubectl get pods -n "$NAMESPACE"
 
 # Depends on GITLAB_AUTH - File defined inside Project Settings->CI/CD
 # Generated using:
@@ -48,13 +48,13 @@ image: google/cloud-sdk
 # cat $HOME/.docker/config.json
 .prepare_cluster: &prepare_cluster
   # Create Secret if not existing to PullImages from GitLab
-  - if [ -n "$KUBE_NAMESPACE" ]; then kubectl get namespace "$KUBE_NAMESPACE" 2>/dev/null || kubectl create namespace "$KUBE_NAMESPACE"; fi
-  - kubectl get secrets --namespace=$KUBE_NAMESPACE
+  - if [ -n "$NAMESPACE" ]; then kubectl get namespace "$NAMESPACE" 2>/dev/null || kubectl create namespace "$NAMESPACE"; fi
+  - kubectl get secrets --namespace=$NAMESPACE
   - |
-    if kubectl get secrets --namespace=$KUBE_NAMESPACE | grep $SECRET; then
-      echo "$SECRET exists in namespace $KUBE_NAMESPACE, skipping..."
+    if kubectl get secrets --namespace=$NAMESPACE | grep $SECRET; then
+      echo "$SECRET exists in namespace $NAMESPACE, skipping..."
     else
-      kubectl create secret generic $SECRET --from-file=.dockerconfigjson=${GITLAB_AUTH} --type=kubernetes.io/dockerconfigjson --namespace=$KUBE_NAMESPACE
+      kubectl create secret generic $SECRET --from-file=.dockerconfigjson=${GITLAB_AUTH} --type=kubernetes.io/dockerconfigjson --namespace=$NAMESPACE
     fi
 
 # Pipeline was triggered - check the branch
