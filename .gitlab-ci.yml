@@ -91,9 +91,8 @@ deploy:
           echo $dir
           echo `pwd`
           APPLICATION=$(basename ${dir%*/})
-          echo $APPLICATION
           IMAGE="${CI_PROJECT_NAMESPACE}/${APPLICATION}/released:latest"
-          APPLY="${CI_PROJECT_DIR}/applications/${APP}/gcp/apply.sh"
+          APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
           APPLICATION=$APPLICATION IMAGE=$IMAGE NAMESPACE=$NAMESPACE bash $APPLY
       done
 #    - gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
