@@ -101,7 +101,7 @@ patch:
 deploy:
   stage: deploy
   environment: $ENVIRONMENT
-  extends: [.environments, .kube-context ]
+  extends: [.environments ]
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
