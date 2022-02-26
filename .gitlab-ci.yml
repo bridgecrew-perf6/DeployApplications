@@ -85,7 +85,7 @@ image: google/cloud-sdk
 patch:
   stage: deploy
   environment: $ENVIRONMENT
-  extends: [.kube-context, .environments]
+  extends: [.environments, .kube-context ]
   script:
   - APPLICATION=$UPSTREAM_PROJECT_NAME
   - *echo
@@ -101,7 +101,7 @@ patch:
 deploy:
   stage: deploy
   environment: $ENVIRONMENT
-  extends: [.kube-context, .environments]
+  extends: [.environments, .kube-context ]
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
