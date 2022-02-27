@@ -30,12 +30,13 @@ image: google/cloud-sdk
 
 
 
-.environments:
+.set-context: &set-context
   rules:
   - if: ENVIRONMENT == $TEST_ENV
     <<: *test_env
-  - if: ENVIRONMENT == $DEMO_ENV
-    <<: *demo_env
+  - if: ENVIRONMENT == 'demo'
+    variables:
+      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   - if: ENVIRONMENT == $DEV_ENV
     <<: *dev_env
 
@@ -85,7 +86,7 @@ image: google/cloud-sdk
 patch:
   stage: deploy
   environment: $ENVIRONMENT
-  extends: [.environments, .kube-context ]
+  extends: [.set-context, .kube-context ]
   script:
   - APPLICATION=$UPSTREAM_PROJECT_NAME
   - *echo
@@ -101,12 +102,13 @@ patch:
 deploy:
   stage: deploy
   environment: $ENVIRONMENT
-  extends: [.environments ]
+#  extends: [.set-context ]
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
   - !reference [.build_rules, rules]
   script:
+  - *set-context
   - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
   - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
   - *echo
