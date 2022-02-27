@@ -32,13 +32,12 @@ image: google/cloud-sdk
 
 .set-context:
   rules:
-#  - if: ENVIRONMENT == $TEST_ENV
-#    <<: *test_env
-  - if: ENVIRONMENT == 'demo'
-    variables:
-      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-#  - if: ENVIRONMENT == $DEV_ENV
-#    <<: *dev_env
+  - if: $ENVIRONMENT == $TEST_ENV
+    <<: *test_env
+  - if: $ENVIRONMENT == $DEMO_ENV
+    <<: *demo_env
+  - if: $ENVIRONMENT == $DEV_ENV
+    <<: *dev_env
 
 .cluster_patch: &cluster_patch #TODO only patch Image
 - echo "Patching image $IMAGE of application $APPLICATION"
@@ -98,34 +97,46 @@ patch:
     when: always
 
 
-
-deploy:
+deploy demo:
+  environment: demo
   stage: deploy
-  environment: $ENVIRONMENT
-  extends: [.set-context ]
+  script: echo demo
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
   - !reference [.build_rules, rules]
-  - if: $ENVIRONMENT == 'demo'
-    variables:
-      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-#  - !reference [.set-context, rules]
-  script:
-  - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
-  - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
-  - *echo
-#  - *prepare_cluster
-#  - echo $CI_COMMIT_REF_NAME "interesting"
-#  - kubectl get pods -n "$NAMESPACE"
-#  - kubectl config view
-#  - kubectl config current-context
-#  -  |
-#    for dir in ${CI_PROJECT_DIR}/applications/*/
-#    do
-#        APPLICATION=$(basename ${dir%*/})
-#        IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
-#        APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-#        APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
-#    done
-#  - kubectl get pods -n "$NAMESPACE"
+  - if: $ENVIRONMENT == $DEV_DEMO_ENV
+
+
+#deploy:
+#  stage: deploy
+#  environment: $ENVIRONMENT
+#  extends: [.set-context ]
+#  rules:
+#  - if: $PIPELINE_TRIGGERED
+#    when: never
+#  - !reference [.build_rules, rules]
+#  - if: $ENVIRONMENT == 'demo'
+#    variables:
+#      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+##  - !reference [.set-context, rules]
+#  script:
+#  - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
+#  - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
+#  - *echo
+##  - if [ $ENVIRONMENT -eq 'demo' ]; then KUBE_CONTEXT='eva'; fi
+#  - echo KUBE_CONTEXT=$KUBE_CONTEXT
+##  - *prepare_cluster
+##  - echo $CI_COMMIT_REF_NAME "interesting"
+##  - kubectl get pods -n "$NAMESPACE"
+##  - kubectl config view
+##  - kubectl config current-context
+##  -  |
+##    for dir in ${CI_PROJECT_DIR}/applications/*/
+##    do
+##        APPLICATION=$(basename ${dir%*/})
+##        IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
+##        APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
+##        APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
+##    done
+##  - kubectl get pods -n "$NAMESPACE"
