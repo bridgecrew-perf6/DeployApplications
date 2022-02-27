@@ -107,7 +107,7 @@ deploy:
   - if: $PIPELINE_TRIGGERED
     when: never
   - !reference [.build_rules, rules]
-  - if: ENVIRONMENT == 'demo'
+  - if: $ENVIRONMENT == 'demo'
     variables:
       KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 #  - !reference [.set-context, rules]
