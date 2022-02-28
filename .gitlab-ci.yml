@@ -67,7 +67,7 @@ image: google/cloud-sdk
 patch:
   stage: deploy
   environment: $ENVIRONMENT
-  extends: [.set-context, .kube-context ]
+  extends: [ .kube-context ]
   script:
   - APPLICATION=$UPSTREAM_PROJECT_NAME
   - *echo
