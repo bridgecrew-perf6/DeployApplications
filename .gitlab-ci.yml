@@ -4,7 +4,7 @@ include:
 
 variables:
   SECRET: regcred # used for the secret to access Images stored in Gitlab from the GKE
-  IMAGE_PATH: "registry.gitlab.com/${CI_PROJECT_NAMESPACE}" #Path to the deployment images. In this case they are same project Namespace
+  APPLICATION_REPO: "registry.gitlab.com/${CI_PROJECT_NAMESPACE}" #Path to the deployment images. In this case they are same project Namespace
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
@@ -132,21 +132,32 @@ patch:
       done
     - kubectl get pods -n "$NAMESPACE"
 
-deploy:
-  environment: $ENVIRONMENT
-  stage: deploy
-  before_script:
-    - apt update && apt install -y curl jq
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - !reference [.kube-context, before_script]
-  extends: [ .kube-context ]
-  script:
-    - !reference [.deploy, script]
-  rules:
-    - if: $PIPELINE_TRIGGERED
-      when: never
-    - !reference [.deploy, rules]
+#deploy:
+#  environment: $ENVIRONMENT
+#  stage: deploy
+#  before_script:
+#    - apt update && apt install -y curl jq
+#    - mkdir -p ~/.docker
+#    - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
+#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+#    - docker manifest inspect $IMGNAME:$IMGTAG && exit || true
+#    - !reference [.kube-context, before_script]
+##  extends: [ .kube-context ]
+#  script:
+#    - !reference [.deploy, script]
+#  rules:
+#    - if: $PIPELINE_TRIGGERED
+#      when: never
+#    - !reference [.deploy, rules]
 
+deploy_test:
+  stage: deploy
+  variables:
+    APPLICATION_REPO: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa
+  rules:
+  - !reference [.build_rules, rules]
+  script:
+    echo IMAGE_REPO=$IMAGE_REPO
 
 #deploy:
 #  stage: deploy
