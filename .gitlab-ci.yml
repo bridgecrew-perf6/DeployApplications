@@ -104,14 +104,14 @@ patch:
 deploy demo:
   environment: demo
   stage: deploy
-  extends: .set_environment
+#  extends: .set_environment
   script:
   - echo ENVIRONMENT = $ENVIRONMENT
   - echo $PIPELINE_TRIGGERED
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $ENVIRONMENT
+  - !reference [.build_rules, rules]
 #    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
 #      when: never
 
