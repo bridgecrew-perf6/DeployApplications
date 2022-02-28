@@ -93,12 +93,11 @@ deploy demo:
   script:
   - echo KUBE_CONTEXT = $KUBE_CONTEXT
   rules:
-#  - if: '$KUBE_CONTEXT == null'
-#    when: never
   - if: $PIPELINE_TRIGGERED
     when: never
   - !reference [.build_rules, rules]
-
+  - if: '$KUBE_CONTEXT == null'
+    when: never
 #    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
 #      when: never
 
