@@ -108,9 +108,10 @@ deploy demo:
   extends: .set_environment
   script:
   - echo ENVIRONMENT = $ENVIRONMENT
-  rules:
-    - if: $PIPELINE_TRIGGERED
-      when: never
+  - echo $PIPELINE_TRIGGERED
+#  rules:
+#    - if: $PIPELINE_TRIGGERED
+#      when: never
 #    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
 #      when: never
 
