@@ -6,9 +6,9 @@ variables:
   SECRET: regcred # used for the secret to access Images stored in Gitlab from the GKE
 
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
-  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth1"
-  KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth2"
-  KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth3"
+  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
 stages:
 - deploy
@@ -71,10 +71,10 @@ patch:
   script:
   - APPLICATION=$UPSTREAM_PROJECT_NAME
   - *echo
-  #    - *prepare_cluster
-  #    - *cluster_patch
+  - *prepare_cluster
+  - *cluster_patch
   rules:
-    - if: $KUBE_CONTEXT
+    - !reference [.deploy, rules]
     - if: $PIPELINE_TRIGGERED
       when: always
 
@@ -83,23 +83,38 @@ patch:
   rules:
   - !reference [.build_rules, rules]
 
-deploy demo:
-  environment: demo
-  stage: deploy
-#  extends: .set_environment
-  after_script:
-  - echo ENVIRONMENT = $ENVIRONMENT
-  - echo KUBE_CONTEXT = $KUBE_CONTEXT
-  script:
-  - echo KUBE_CONTEXT = $KUBE_CONTEXT
+.deploy:
   rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - !reference [.build_rules, rules]
-  - if: '$KUBE_CONTEXT == null'
-    when: never
-#    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
-#      when: never
+    - !reference [.build_rules, rules]
+    - if: '$KUBE_CONTEXT == null'
+      when: never
+  script:
+    - *echo
+    - *prepare_cluster
+    - echo $CI_COMMIT_REF_NAME "interesting"
+    - kubectl get pods -n "$NAMESPACE"
+    - kubectl config view
+    - kubectl config current-context
+    - |
+      for dir in ${CI_PROJECT_DIR}/applications/*/
+      do
+          APPLICATION=$(basename ${dir%*/})
+          IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
+          APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
+          APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
+      done
+    - kubectl get pods -n "$NAMESPACE"
+
+deploy:
+  environment: $ENVIRONMENT
+  stage: deploy
+  script:
+    - !reference [.deploy, script]
+  rules:
+    - if: $PIPELINE_TRIGGERED
+      when: never
+    - !reference [.deploy, rules]
+
 
 #deploy:
 #  stage: deploy
@@ -119,17 +134,17 @@ deploy demo:
 #  - *echo
 ##  - if [ $ENVIRONMENT -eq 'demo' ]; then KUBE_CONTEXT='eva'; fi
 #  - echo KUBE_CONTEXT=$KUBE_CONTEXT
-##  - *prepare_cluster
-##  - echo $CI_COMMIT_REF_NAME "interesting"
-##  - kubectl get pods -n "$NAMESPACE"
-##  - kubectl config view
-##  - kubectl config current-context
-##  -  |
-##    for dir in ${CI_PROJECT_DIR}/applications/*/
-##    do
-##        APPLICATION=$(basename ${dir%*/})
-##        IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
-##        APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-##        APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
-##    done
-##  - kubectl get pods -n "$NAMESPACE"
+#  - *prepare_cluster
+#  - echo $CI_COMMIT_REF_NAME "interesting"
+#  - kubectl get pods -n "$NAMESPACE"
+#  - kubectl config view
+#  - kubectl config current-context
+#  -  |
+#    for dir in ${CI_PROJECT_DIR}/applications/*/
+#    do
+#        APPLICATION=$(basename ${dir%*/})
+#        IMAGE="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
+#        APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
+#        APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
+#    done
+#  - kubectl get pods -n "$NAMESPACE"
