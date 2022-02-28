@@ -5,7 +5,6 @@ include:
 variables:
   SECRET: regcred
   CONTAINER_REGISTRY: "registry.gitlab.com"
-  ENVIRONMENT: "demo"
 
 .test_environment: &test_env
   variables:
