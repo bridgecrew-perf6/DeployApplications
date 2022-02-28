@@ -113,8 +113,8 @@ patch:
       do
           APPLICATION=$(basename ${dir%*/})
           if [ -f errors ]; then rm errors; fi
-          echo "pulling docker image"
           IMAGE_TAG=$IMAGE_PATH/$APPLICATION/released
+          echo "docker pull $IMAGE_TAG"
           docker pull $IMAGE_TAG > /dev/null 2>&1 || FAILED=true
           echo $FAILED
           if [ -n "$FAILED" ]; then
