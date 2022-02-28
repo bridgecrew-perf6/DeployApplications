@@ -20,6 +20,7 @@ variables:
 
 stages:
 - deploy
+- vars
 
 image: google/cloud-sdk
 
@@ -98,15 +99,16 @@ patch:
 
 
 .set_environment:
-  stage: vars
   rules:
   - !reference [.build_rules, rules]
+  script: echo $ENVIRONMENT
 
 deploy demo:
   environment: demo
   stage: deploy
   extends: .set_environment
-  script: echo ENVIRONMENT = $ENVIRONMENT
+  script:
+  - echo ENVIRONMENT = $ENVIRONMENT
   rules:
     - if: $PIPELINE_TRIGGERED
       when: never
