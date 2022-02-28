@@ -114,9 +114,12 @@ patch:
           APPLICATION=$(basename ${dir%*/})
           if [ -f errors ]; then rm errors; fi
           IMAGE_TAG=$IMAGE_PATH/$APPLICATION/released
+          export GITLAB_TOKEN=$(curl -s --user "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" "https://gitlab.cc-asp.fraunhofer.de/jwt/auth?offline_token=true&service=container_registry&scope=repository:${IMAGE_TAG}:pull" | jq -r ".token")
+          echo GITLAB_TOKEN = $GITLAB_TOKEN
           echo "docker pull $IMAGE_TAG"
           docker pull $IMAGE_TAG:latest
           docker pull $IMAGE_TAG > /dev/null 2>&1 || FAILED=true
+
           echo $FAILED
           if [ -n "$FAILED" ]; then
             echo "Image $IMAGE_TAG does not exist, will try the Fall back Image option"
