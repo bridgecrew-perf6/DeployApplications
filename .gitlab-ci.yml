@@ -97,7 +97,7 @@ patch:
 
 .deploy:
   rules:
-    - !reference [.build_rules, rules]
+    - !reference [.build_vars, rules]
     - if: '$KUBE_CONTEXT == null'
       when: never
   script:
@@ -164,12 +164,15 @@ deploy_test:
   variables:
     APPLICATION_REPO: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa
 #    IMAGE_TAG: latest
+  rules:
+  - !reference [.build_vars, rules]
   script:
     - set -x
-    - !reference [.build_rules, script]
+#    - echo
+#    - !reference [.build_vars, script]
     - echo $IMAGE_REPO
-    - *containerExists
-    - echo IMAGE_EXISTS=$IMAGE_EXISTS
+#    - *containerExists
+#    - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
 #    - echo IMAGE_REPO=$IMAGE_REPO
 #    - export image_repository=${APPLICATION_REPO:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
@@ -182,7 +185,7 @@ deploy_test:
 #  rules:
 #  - if: $PIPELINE_TRIGGERED
 #    when: never
-#  - !reference [.build_rules, rules]
+#  - !reference [.build_vars, rules]
 #  - if: $ENVIRONMENT == 'demo'
 #    variables:
 #      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
