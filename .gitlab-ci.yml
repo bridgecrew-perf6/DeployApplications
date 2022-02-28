@@ -107,11 +107,14 @@ deploy demo:
 #  extends: .set_environment
   script:
   - echo ENVIRONMENT = $ENVIRONMENT
-  - echo $PIPELINE_TRIGGERED
+  - echo KUBE_CONTEXT = $KUBE_CONTEXT
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
   - !reference [.build_rules, rules]
+  - if: $ENVIRONMENT == "demo"
+    variables:
+      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 #    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
 #      when: never
 
