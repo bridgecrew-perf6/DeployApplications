@@ -16,7 +16,7 @@ stages:
 image: google/cloud-sdk
 
 .kube-context:
-  before_script:
+  script:
   - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
   - kubectl config current-context
 
@@ -75,9 +75,8 @@ patch:
   - *cluster_patch
   rules:
     - !reference [.deploy, rules]
-    - if: $PIPELINE_TRIGGERED
-      when: always
-
+    - if: '$PIPELINE_TRIGGERED == null'
+      when: never
 
 .set_environment:
   rules:
@@ -108,6 +107,7 @@ patch:
 deploy:
   environment: $ENVIRONMENT
   stage: deploy
+  extends: [ .kube-context ]
   script:
     - !reference [.deploy, script]
   rules:
