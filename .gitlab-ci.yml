@@ -156,7 +156,7 @@ patch:
 - mkdir -p ~/.docker
 - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
 - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-- docker manifest inspect $IMAGE_NAME > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
+- docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
 - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
 deploy_test:
@@ -167,7 +167,7 @@ deploy_test:
   script:
     - set -x
     - !reference [.build_rules, script]
-    - echo $IMAGE_NAME
+    - echo $IMAGE_REPO
     - *containerExists
     - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
