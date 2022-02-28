@@ -81,19 +81,19 @@ patch:
 
 
 
-check_image_exists:
-  image: debian:buster
-  before_script:
-  - apt update && apt install -y curl jq
-  script:
-  - export IMAGE_NAME=$IMAGE_LATEST
-  - echo $IMAGE_LATEST
-  - 'export IMAGE_NAME=$(echo $CI_REGISTRY_IMAGE) | cut -d "/" -f2-)'
-  - 'export GITLAB_TOKEN=$(curl -s --user "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" "https://gitlab.cc-asp.fraunhofer.de/jwt/auth?offline_token=true&service=container_registry&scope=repository:${IMAGE_NAME}:pull" | jq -r ".token")'
-  - 'if ! curl --fail -s -o /dev/null -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $GITLAB_TOKEN" "https://${CI_REGISTRY}/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"; then echo ERROR ${IMAGE_NAME}:${IMAGE_TAG} does not exist; exit 1; fi'
-  - 'echo Deploying ${IMAGE_NAME}:${IMAGE_TAG}'
-  rules:
-  - !reference [.deploy, rules]
+#check_image_exists:
+#  image: debian:buster
+#  before_script:
+#  - apt update && apt install -y curl jq
+#  script:
+#  - export IMAGE_NAME=$IMAGE_LATEST
+#  - echo $IMAGE_LATEST
+#  - 'export IMAGE_NAME=$(echo $CI_REGISTRY_IMAGE) | cut -d "/" -f2-)'
+#  - 'export GITLAB_TOKEN=$(curl -s --user "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" "https://gitlab.cc-asp.fraunhofer.de/jwt/auth?offline_token=true&service=container_registry&scope=repository:${IMAGE_NAME}:pull" | jq -r ".token")'
+#  - 'if ! curl --fail -s -o /dev/null -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $GITLAB_TOKEN" "https://${CI_REGISTRY}/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"; then echo ERROR ${IMAGE_NAME}:${IMAGE_TAG} does not exist; exit 1; fi'
+#  - 'echo Deploying ${IMAGE_NAME}:${IMAGE_TAG}'
+#  rules:
+#  - !reference [.deploy, rules]
 
 .deploy:
   rules:
@@ -126,7 +126,7 @@ deploy:
   stage: deploy
   before_script:
     - apt update && apt install -y curl jq
-    - !reference [.context, before_script]
+    - !reference [.kube-context, before_script]
   extends: [ .kube-context ]
   script:
     - !reference [.deploy, script]
