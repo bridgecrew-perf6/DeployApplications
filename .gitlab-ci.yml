@@ -151,6 +151,8 @@ patch:
 #    - !reference [.deploy, rules]
 
 .containerExists: &containerExists
+# Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
+# via https://gitlab.com/gitlab-org/gitlab-foss/issues/26866#note_97609397
 - mkdir -p ~/.docker
 - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
 - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
