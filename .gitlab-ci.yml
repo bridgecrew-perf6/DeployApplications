@@ -38,6 +38,9 @@ image: google/cloud-sdk
     <<: *demo_env
   - if: $ENVIRONMENT == $DEV_ENV
     <<: *dev_env
+  - if:  $CI_PROJECT_DIR
+    variables:
+      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth4"
 
 .cluster_patch: &cluster_patch #TODO only patch Image
 - echo "Patching image $IMAGE of application $APPLICATION"
