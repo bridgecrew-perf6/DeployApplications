@@ -102,8 +102,7 @@ patch:
 #  rules:
 #  - !reference [.build_rules, rules]
   variables:
-    ENVIRONMENT: 'demo'
-  script: echo $ENVIRONMENT
+    ENVIRONMENT: "demo"
 
 deploy demo:
   environment: demo
