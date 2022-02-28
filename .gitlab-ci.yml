@@ -4,7 +4,7 @@ include:
 
 variables:
   SECRET: regcred # used for the secret to access Images stored in Gitlab from the GKE
-
+  IMAGE_PATH: "registry.gitlab.com/${CI_PROJECT_NAMESPACE}" #Path to the deployment images. In this case they are same project Namespace
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
@@ -114,16 +114,17 @@ patch:
           APPLICATION=$(basename ${dir%*/})
           if [ -f errors ]; then rm errors; fi
           echo "pulling docker image"
-          docker pull $IMAGE_LATEST 2> errors
-          cat errors
-          if [ -f errors ]; then
-            echo "Image $IMAGE_LATEST does not exist, will try the Fall back Image option"
+          IMAGE_TAG=$IMAGE_PATH/$APPLICATION/released
+          docker pull $IMAGE_TAG > /dev/null 2>&1 || FAILED=true
+          echo $FAILED
+          if [ -n "$FAILED" ]; then
+            echo "Image $IMAGE_TAG does not exist, will try the Fall back Image option"
           else
-            echo Deploying ${IMAGE_LATEST}
+            echo Deploying ${IMAGE_TAG}
           fi
 
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-          APPLICATION=$APPLICATION IMAGE=$IMAGE_LATEST KUBE_NAMESPACE=$NAMESPACE bash $APPLY
+          APPLICATION=$APPLICATION IMAGE=$IMAGE_TAG KUBE_NAMESPACE=$NAMESPACE bash $APPLY
       done
     - kubectl get pods -n "$NAMESPACE"
 
