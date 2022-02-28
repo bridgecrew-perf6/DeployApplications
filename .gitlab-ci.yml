@@ -113,7 +113,7 @@ patch:
           APPLICATION=$(basename ${dir%*/})
           IMAGE_NAME="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/released"
           IMAGE_TAG=latest
-          export GITLAB_TOKEN=$(curl -s --user "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" "https://gitlab.cc-asp.fraunhofer.de/jwt/auth?offline_token=true&service=container_registry&scope=repository:${IMAGE_NAME}:pull" | jq -r ".token")'
+          export GITLAB_TOKEN=$(curl -s --user "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" "https://gitlab.cc-asp.fraunhofer.de/jwt/auth?offline_token=true&service=container_registry&scope=repository:${IMAGE_NAME}:pull" | jq -r ".token")
           if ! curl --fail -s -o /dev/null -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $GITLAB_TOKEN" "https://${CI_REGISTRY}/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"; then echo ERROR ${IMAGE_NAME}:${IMAGE_TAG} does not exist; exit 1; fi
           echo Deploying ${IMAGE_NAME}:${IMAGE_TAG}
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
