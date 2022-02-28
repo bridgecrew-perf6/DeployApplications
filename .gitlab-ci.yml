@@ -112,8 +112,8 @@ deploy demo:
   rules:
     - if: $PIPELINE_TRIGGERED
       when: never
-    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
-      when: never
+#    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
+#      when: never
 
 #deploy:
 #  stage: deploy
