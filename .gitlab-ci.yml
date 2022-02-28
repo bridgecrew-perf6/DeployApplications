@@ -3,20 +3,12 @@ include:
   file: .gitlab-ci-build-vars.yml
 
 variables:
-  SECRET: regcred
-  CONTAINER_REGISTRY: "registry.gitlab.com"
+  SECRET: regcred # used for the secret to access Images stored in Gitlab from the GKE
 
-.test_environment: &test_env
-  variables:
-    KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth1"
-
-.demo_environment: &demo_env
-  variables:
-    KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth2"
-
-.dev_environment: &dev_env
-  variables:
-    KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth3"
+  # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
+  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth1"
+  KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth2"
+  KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth3"
 
 stages:
 - deploy
@@ -28,19 +20,6 @@ image: google/cloud-sdk
   - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
   - kubectl config current-context
 
-
-
-.set-context:
-  rules:
-  - if: $ENVIRONMENT == $TEST_ENV
-    <<: *test_env
-  - if: $ENVIRONMENT == $DEMO_ENV
-    <<: *demo_env
-  - if: $ENVIRONMENT == $DEV_ENV
-    <<: *dev_env
-  - if:  $CI_PROJECT_DIR
-    variables:
-      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth4"
 
 .cluster_patch: &cluster_patch #TODO only patch Image
 - echo "Patching image $IMAGE of application $APPLICATION"
@@ -112,12 +91,14 @@ deploy demo:
   - echo ENVIRONMENT = $ENVIRONMENT
   - echo KUBE_CONTEXT = $KUBE_CONTEXT
   script:
-  - echo 'hello'
+  - echo KUBE_CONTEXT = $KUBE_CONTEXT
   rules:
+  - if: '$KUBE_CONTEXT == null'
+    when: never
   - if: $PIPELINE_TRIGGERED
     when: never
   - !reference [.build_rules, rules]
-  - !reference [.set-context, rules]
+
 #    - if: $ENVIRONMENT == $TEST_ENV_NAME || $ENVIRONMENT == $DEV_ENV_NAME
 #      when: never
 
