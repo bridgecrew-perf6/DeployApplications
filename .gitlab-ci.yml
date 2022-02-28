@@ -99,8 +99,10 @@ patch:
 
 
 .set_environment:
-  rules:
-  - !reference [.build_rules, rules]
+#  rules:
+#  - !reference [.build_rules, rules]
+  variables:
+    ENVIRONMENT = 'demo'
   script: echo $ENVIRONMENT
 
 deploy demo:
@@ -112,8 +114,8 @@ deploy demo:
   rules:
     - if: $PIPELINE_TRIGGERED
       when: never
-    - if: $ENVIRONMENT == $DEV_DEMO_ENV
-
+    - if: $ENVIRONMENT == 'demo'
+      when: never
 
 #deploy:
 #  stage: deploy
