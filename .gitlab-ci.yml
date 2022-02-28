@@ -92,9 +92,9 @@ patch:
   #    - *prepare_cluster
   #    - *cluster_patch
   rules:
-  - if: $KUBE_CONTEXT
-  - if: $PIPELINE_TRIGGERED
-    when: always
+    - if: $KUBE_CONTEXT
+    - if: $PIPELINE_TRIGGERED
+      when: always
 
 
 .set_environment:
@@ -108,9 +108,9 @@ deploy demo:
   extends: .set_environment
   script: echo ENVIRONMENT = $ENVIRONMENT
   rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - if: $ENVIRONMENT = $DEV_DEMO_ENV
+    - if: $PIPELINE_TRIGGERED
+      when: never
+    - if: $ENVIRONMENT = $DEV_DEMO_ENV
 
 
 #deploy:
