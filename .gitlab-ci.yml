@@ -16,9 +16,10 @@ stages:
 image: google/cloud-sdk
 
 .kube-context:
-  script:
-  - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
-  - kubectl config current-context
+  before_script:
+    - echo "Setting KUBE_CONTEXT to $KUBE_CONTEXT"
+    - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
+    - kubectl config current-context
 
 
 .cluster_patch: &cluster_patch #TODO only patch Image
@@ -74,13 +75,10 @@ patch:
   - *prepare_cluster
   - *cluster_patch
   rules:
-    - !reference [.deploy, rules]
     - if: '$PIPELINE_TRIGGERED == null'
       when: never
+    - !reference [.deploy, rules]
 
-.set_environment:
-  rules:
-  - !reference [.build_rules, rules]
 
 .deploy:
   rules:
