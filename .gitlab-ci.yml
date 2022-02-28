@@ -101,6 +101,7 @@ patch:
     - if: '$KUBE_CONTEXT == null'
       when: never
   script:
+    - set -x
     - *echo
     - *prepare_cluster
     - echo $CI_COMMIT_REF_NAME "interesting"
@@ -111,17 +112,18 @@ patch:
       for dir in ${CI_PROJECT_DIR}/applications/*/
       do
           APPLICATION=$(basename ${dir%*/})
-          IMAGE_NAME="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/released"
           if [ -f errors ]; then rm errors; fi
-          docker pull $IMAGE_NAME 2> errors
+          echo "pulling docker image"
+          docker pull $IMAGE_LATEST 2> errors
+          cat errors
           if [ -f errors ]; then
-            echo "Image $IMAGE does not exist, will try the Fall back Image option"
+            echo "Image $IMAGE_LATEST does not exist, will try the Fall back Image option"
           else
-            echo Deploying ${IMAGE_NAME}
+            echo Deploying ${IMAGE_LATEST}
           fi
 
           APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-          APPLICATION=$APPLICATION IMAGE=${IMAGE_NAME}:${IMAGE_TAG} KUBE_NAMESPACE=$NAMESPACE bash $APPLY
+          APPLICATION=$APPLICATION IMAGE=$IMAGE_LATEST KUBE_NAMESPACE=$NAMESPACE bash $APPLY
       done
     - kubectl get pods -n "$NAMESPACE"
 
