@@ -157,7 +157,9 @@ deploy_test:
   rules:
   - !reference [.build_rules, rules]
   script:
-    echo IMAGE_REPO=$IMAGE_REPO
+    - echo IMAGE_REPO=$IMAGE_REPO
+    - export image_repository=${APPLICATION_REPO:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+    - echo $image_repository
 
 #deploy:
 #  stage: deploy
