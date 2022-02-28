@@ -5,6 +5,7 @@ include:
 variables:
   SECRET: regcred
   CONTAINER_REGISTRY: "registry.gitlab.com"
+  ENVIRONMENT: "demo"
 
 .test_environment: &test_env
   variables:
@@ -99,10 +100,8 @@ patch:
 
 
 .set_environment:
-#  rules:
-#  - !reference [.build_rules, rules]
-  variables:
-    ENVIRONMENT: "demo"
+  rules:
+  - !reference [.build_rules, rules]
 
 deploy demo:
   environment: demo
