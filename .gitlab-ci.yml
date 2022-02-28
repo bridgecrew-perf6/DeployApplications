@@ -153,13 +153,17 @@ patch:
 deploy_test:
   stage: deploy
   variables:
-    APPLICATION_REPO: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa
-  rules:
-  - !reference [.build_rules, rules]
+    IMAGE_NAME: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa/released
+    IMAGE_TAG: latest
   script:
-    - echo IMAGE_REPO=$IMAGE_REPO
-    - export image_repository=${APPLICATION_REPO:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
-    - echo $image_repository
+    - mkdir -p ~/.docker
+    - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker manifest inspect $IMAGE_NAME:$IMAGE_TAG && exit || true
+
+#    - echo IMAGE_REPO=$IMAGE_REPO
+#    - export image_repository=${APPLICATION_REPO:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
+#    - echo $image_repository
 
 #deploy:
 #  stage: deploy
