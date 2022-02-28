@@ -150,18 +150,23 @@ patch:
 #      when: never
 #    - !reference [.deploy, rules]
 
+.containerExists: &containerExists
+- mkdir -p ~/.docker
+- "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
+- docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+- docker manifest inspect $IMAGE_NAME > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
+- echo IMAGE_EXISTS=$IMAGE_EXISTS
+
 deploy_test:
   stage: deploy
   variables:
     IMAGE_NAME: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa/released
     IMAGE_TAG: latest
   script:
-    - mkdir -p ~/.docker
-    - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker manifest inspect $IMAGE_NAME:$IMAGE_TAG && exit || true
-    - echo '------'
-    - docker manifest inspect $IMAGE_NAME:noneexisting && exit || true
+    - set -x
+    - echo $IMAGE_NAME
+    - *containerExists
+    - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
 #    - echo IMAGE_REPO=$IMAGE_REPO
 #    - export image_repository=${APPLICATION_REPO:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
