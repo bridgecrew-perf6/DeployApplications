@@ -110,7 +110,7 @@ deploy demo:
   rules:
     - if: $PIPELINE_TRIGGERED
       when: never
-    - if: $ENVIRONMENT = $DEV_DEMO_ENV
+    - if: $ENVIRONMENT == $DEV_DEMO_ENV
 
 
 #deploy:
