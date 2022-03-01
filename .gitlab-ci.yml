@@ -6,13 +6,16 @@ variables:
   SECRET: regcred # used for the secret to access Images stored in Gitlab from the GKE
   CONTAINER_REGISTRY: "registry.gitlab.com"
 
-  APPLICATION_PATH: ${CI_PROJECT_NAMESPACE} #Path to the deployment images. In this case they are same project Namespace
-  # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
-  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-  KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-  KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  APP_PATH: ${CI_PROJECT_NAMESPACE} # Namespace of the Projects with Application Images. Assumption: All of them are under same hierarchy with ProjectName==ApplicationName. In this example all Applications are in the sane namespace as this file.
+  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
-  APPLICATION_REPO: ${CONTAINER_REGISTRY}/${APPLICATION_PATH}
+  # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
+  #Sharing same Agent, but could use different agents
+  KUBE_CONTEXT_DEV: $KUBE_CONTEXT
+  KUBE_CONTEXT_DEMO: $KUBE_CONTEXT
+  KUBE_CONTEXT_TEST: $KUBE_CONTEXT
+
+  APP_REPO: ${CONTAINER_REGISTRY}/${APPLICATION_PATH}
 
 stages:
 - deploy
@@ -167,11 +170,17 @@ patch:
   -  |
     for dir in ${CI_PROJECT_DIR}/applications/*/
     do
-        APPLICATION=$(basename ${dir%*/})
-        IMAGE_REPO="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TYPE}"
-        echo IMAGE_REPO=$IMAGE_REPO
-        docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
-        echo $IMAGE_REPO, $IMAGE_EXISTS
+        APP_NAME=$(basename ${dir%*/})
+        IMAGE="${APP_REPO}/${APP_NAME}/${REPO_SUB/:-}${IMAGE_TYPE}"
+        IMAGE_RELEASED="${APP_NAME}/${APPLICATION}/${RELEASED}" #Fallback Image
+        echo IMAGE=$IMAGE
+        docker manifest inspect $IMAGE > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
+        echo $APP_ENV_REPO, $IMAGE_EXISTS
+        if [ $IMAGE_EXISTS -eq 'false' ]; then
+            docker manifest inspect $IMAGE_RELEASED > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
+            if [ $IMAGE_EXISTS -eq 'false' ]; then IMAGE=$IMAGE_RELEASED; fi
+        fi
+        echo $IMAGE, $IMAGE_EXISTS
     done
   - kubectl get pods -n "$NAMESPACE"
 
@@ -186,9 +195,8 @@ patch:
 
 deploy_demo:
   extends: [.kube-context ]
-  variables:
-    REPO_SUB: $CI_COMMIT_BRANCH
-    FALLBACK_IMAGE:
+#  variables:
+#    REPO_SUB: $CI_COMMIT_BRANCH
   environment: demo
   stage: deploy
   rules:
