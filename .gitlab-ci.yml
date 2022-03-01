@@ -174,11 +174,11 @@ patch:
         IMAGE="${APP_REPO}/${APP_NAME}/${REPO_SUB/:-}${IMAGE_TYPE}"
         IMAGE_RELEASED="${APP_REPO}/${APP_NAME}/${RELEASED}"
         echo IMAGE=$IMAGE, IMAGE_RELEASED=$IMAGE_RELEASED
-        docker manifest inspect $IMAGE > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
+        docker manifest inspect $IMAGE > /dev/null 2>&1 && IMAGE_EXISTS=0 || IMAGE_EXISTS=1
         echo $IMAGE, $IMAGE_EXISTS
-        if [ $IMAGE_EXISTS -eq 'false' ]; then
-            docker manifest inspect $IMAGE_RELEASED > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
-            if [ $IMAGE_EXISTS -eq 'true' ]; then IMAGE=$IMAGE_RELEASED; fi
+        if [ $IMAGE_EXISTS -eq '1' ]; then
+            docker manifest inspect $IMAGE_RELEASED > /dev/null 2>&1 && IMAGE_EXISTS=0 || IMAGE_EXISTS=1
+            if [ $IMAGE_EXISTS -eq '0' ]; then IMAGE=$IMAGE_RELEASED; fi
         fi
         echo $IMAGE, $IMAGE_EXISTS
     done
