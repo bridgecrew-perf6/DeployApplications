@@ -7,6 +7,7 @@ variables:
   CONTAINER_REGISTRY: "registry.gitlab.com"
 
   APP_PATH: ${CI_PROJECT_NAMESPACE} # Namespace of the Projects with Application Images. Assumption: All of them are under same hierarchy with ProjectName==ApplicationName. In this example all Applications are in the sane namespace as this file.
+  APP_REPO: ${CONTAINER_REGISTRY}/${APP_PATH}
 
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   #Sharing same Agent, but could use different agents
@@ -14,7 +15,7 @@ variables:
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
-  APP_REPO: ${CONTAINER_REGISTRY}/${APPLICATION_PATH}
+
 
 stages:
 - deploy
@@ -171,13 +172,13 @@ patch:
     do
         APP_NAME=$(basename ${dir%*/})
         IMAGE="${APP_REPO}/${APP_NAME}/${REPO_SUB/:-}${IMAGE_TYPE}"
-        IMAGE_RELEASED="${APP_NAME}/${APPLICATION}/${RELEASED}" #Fallback Image
-        echo IMAGE=$IMAGE
+        IMAGE_RELEASED="${APP_REPO}/${APP_NAME}/${RELEASED}"
+        echo IMAGE=$IMAGE, IMAGE_RELEASED=$IMAGE_RELEASED
         docker manifest inspect $IMAGE > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
-        echo $APP_ENV_REPO, $IMAGE_EXISTS
+        echo $IMAGE, $IMAGE_EXISTS
         if [ $IMAGE_EXISTS -eq 'false' ]; then
             docker manifest inspect $IMAGE_RELEASED > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
-            if [ $IMAGE_EXISTS -eq 'false' ]; then IMAGE=$IMAGE_RELEASED; fi
+            if [ $IMAGE_EXISTS -eq 'true' ]; then IMAGE=$IMAGE_RELEASED; fi
         fi
         echo $IMAGE, $IMAGE_EXISTS
     done
