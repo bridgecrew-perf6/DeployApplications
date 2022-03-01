@@ -190,21 +190,21 @@ patch:
 - docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
 - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
-.commit_rules:
-  rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - if: $CI_COMMIT_BRANCH == null
-    when: never
-  - !reference [.build_vars, rules]
-
-.mr_rules:
-  rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - if: $CI_COMMIT_BRANCH == null
-    when: never
-  - !reference [.build_vars, rules]
+#.commit_rules:
+#  rules:
+#  - if: $PIPELINE_TRIGGERED
+#    when: never
+#  - if: $CI_COMMIT_BRANCH == null
+#    when: never
+#  - !reference [.build_vars, rules]
+#
+#.mr_rules:
+#  rules:
+#  - if: $PIPELINE_TRIGGERED
+#    when: never
+#  - if: $CI_COMMIT_BRANCH == null
+#    when: never
+#  - !reference [.build_vars, rules]
 
 .deploy:
   stage: deploy
@@ -234,19 +234,19 @@ deploy_main:
     BRANCH_NAME: 'main'
   extends: [.deploy ]
 
-deploy_feature1:
-  environment: development
-  variables:
-    BRANCH_NAME: 'test1' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
-    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
-  extends: [.deploy ]
-
-deploy_feature2:
-  environment: development
-  variables:
-    BRANCH_NAME: 'test2' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
-    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
-  extends: [.deploy ]
+#deploy_feature1:
+#  environment: development
+#  variables:
+#    BRANCH_NAME: 'test1' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
+#    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
+#  extends: [.deploy ]
+#
+#deploy_feature2:
+#  environment: development
+#  variables:
+#    BRANCH_NAME: 'test2' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
+#    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
+#  extends: [.deploy ]
 
 #deploy:
 #  stage: deploy
