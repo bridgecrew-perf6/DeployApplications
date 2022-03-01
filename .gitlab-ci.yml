@@ -4,12 +4,15 @@ include:
 
 variables:
   SECRET: regcred # used for the secret to access Images stored in Gitlab from the GKE
-  APPLICATION_REPO: "registry.gitlab.com/${CI_PROJECT_NAMESPACE}" #Path to the deployment images. In this case they are same project Namespace
+  CONTAINER_REGISTRY: "registry.gitlab.com"
+
+  APPLICATION_PATH: ${CI_PROJECT_NAMESPACE} #Path to the deployment images. In this case they are same project Namespace
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
+  APPLICATION_REPO: ${CONTAINER_REGISTRY}/${APPLICATION_PATH}
 stages:
 - deploy
 
@@ -54,6 +57,7 @@ image: google/cloud-sdk
 - echo ENVIRONMENT = $ENVIRONMENT
 - echo IMAGE = $IMAGE
 - echo NAMESPACE = $NAMESPACE
+- echo KUBE_CONTEXT=$KUBE_CONTEXT
 - echo UPSTREAM_PROJECT_NAME = $UPSTREAM_PROJECT_NAME
 - echo UPSTREAM_PROJECT_PATH = $UPSTREAM_PROJECT
 - echo Patching image $IMAGE of application $UPSTREAM_PROJECT_NAME, using $ENVIRONMENT environment and $NAMESPACE namespace
@@ -112,14 +116,10 @@ patch:
     - |
       for dir in ${CI_PROJECT_DIR}/applications/*/
       do
-          APPLICATION=$(basename ${dir%*/})
+          APPLICATION_NAME=$(basename ${dir%*/})
           if [ -f errors ]; then rm errors; fi
-          IMAGE_TAG=$IMAGE_PATH/$APPLICATION/released
-          export GITLAB_TOKEN=$(curl -s --user "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" "https://gitlab.cc-asp.fraunhofer.de/jwt/auth?offline_token=true&service=container_registry&scope=repository:${IMAGE_TAG}:pull" | jq -r ".token")
-          echo GITLAB_TOKEN = $GITLAB_TOKEN
-          echo "docker pull $IMAGE_TAG"
-          docker pull $IMAGE_TAG:latest
-          docker pull $IMAGE_TAG > /dev/null 2>&1 || FAILED=true
+          IMAGE_REPO=$APPLICATION_REPO/$APPLICATION_NAME/${CI_COMMIT_REF_SLUG-:}/$IMAGE_TYPE
+
 
           echo $FAILED
           if [ -n "$FAILED" ]; then
@@ -151,6 +151,27 @@ patch:
 #      when: never
 #    - !reference [.deploy, rules]
 
+.deploy_applications: &deploy_applications
+  - *echo
+  - *prepare_cluster
+  - kubectl get pods -n "$NAMESPACE"
+  - kubectl config view
+  - kubectl config current-context
+  # Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
+  # via https://gitlab.com/gitlab-org/gitlab-foss/issues/26866#note_97609397
+  - mkdir -p ~/.docker
+  - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  -  |
+    for dir in ${CI_PROJECT_DIR}/applications/*/
+    do
+        APPLICATION=$(basename ${dir%*/})
+        IMAGE_REPO="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
+        docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
+        echo $IMAGE_REPO, $IMAGE_EXISTS
+    done
+  - kubectl get pods -n "$NAMESPACE"
+
 .containerExists: &containerExists
 # Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
 # via https://gitlab.com/gitlab-org/gitlab-foss/issues/26866#note_97609397
@@ -163,21 +184,18 @@ patch:
 deploy_demo:
   environment: demo
   stage: deploy
-  variables:
-    APPLICATION_REPO: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa
-#    IMAGE_TAG: latest
-#  rules:
-#  - !reference [.build_vars, rules]
   rules:
+  - if: $PIPELINE_TRIGGERED
+    when: never
   - if: $CI_COMMIT_BRANCH == null || $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
     when: never
   - !reference [.build_vars, rules]
   script:
     - set -x
-#    - IMAGE_REPO=${APPLICATION_REPO}/$RELEASE_TAG_PREFIX
 #    - NAMESPACE=${DEMO_ENV_NAME}
     - echo $NAMESPACE
-    - echo $IMAGE_REPO
+    - echo $KUBE_CONTEXT
+    - *deploy_applications
 #    - *containerExists
 #    - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
