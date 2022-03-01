@@ -214,9 +214,9 @@ patch:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $BRANCH_NAME == $CI_COMMIT_BRANCH && $CI_ENVIRONMENT_NAME == 'test' # || $CI_ENVIRONMENT_NAME == 'test' || $CI_ENVIRONMENT_NAME == "test")
-    when: never
-  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME != $CI_DEFAULT_BRANCH
+#  - if: $BRANCH_NAME == $CI_COMMIT_BRANCH && $CI_ENVIRONMENT_NAME == 'test' # || $CI_ENVIRONMENT_NAME == 'test' || $CI_ENVIRONMENT_NAME == "test")
+#    when: never
+  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     when: never
   - !reference [.build_vars, rules]
   script:
@@ -239,8 +239,6 @@ deploy_main:
 
 deploy_mr:
   environment: test
-  variables:
-    BRANCH_NAME: 'main'
   extends: [.deploy ]
 
 deploy_feature1:
