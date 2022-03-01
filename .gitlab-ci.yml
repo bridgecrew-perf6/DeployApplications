@@ -13,7 +13,7 @@ variables:
   #Sharing same Agent, but could use different agents
 
   KUBE_CONTEXT_FEATURE1: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-  FEATURE1_BRANCH_NAME: "test1"
+  BRANCH_NAME_FEATURE1: "test1"
 
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
@@ -198,8 +198,6 @@ patch:
 
 deploy_demo:
   extends: [.kube-context ]
-#  variables:
-#    REPO_SUB: $CI_COMMIT_BRANCH
   environment: demo
   stage: deploy
   rules:
@@ -214,24 +212,31 @@ deploy_demo:
     - echo $KUBE_CONTEXT
     - *deploy_applications
 
-deploy_feature1:
+
+.deploy_dev:
+  stage: deploy
   extends: [.kube-context ]
   environment: development
-  stage: deploy
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $CI_COMMIT_BRANCH == null || $CI_COMMIT_BRANCH != $FEATURE1_BRANCH_NAME
+  - if: $CI_COMMIT_BRANCH == null || $CI_COMMIT_BRANCH != $BRANCH_NAME
     when: never
   - !reference [.build_vars, rules]
   variables:
     REPO_SUB: $CI_COMMIT_BRANCH
-    KUBE_CONTEXT: $KUBE_CONTEXT_FEATURE1
+    KUBE_CONTEXT: $KUBE_CONTEXT_DEV
   script:
   - set -x
   - echo $NAMESPACE
   - echo $KUBE_CONTEXT
   - *deploy_applications
+
+deploy_feature1:
+  variables:
+    BRANCH_NAME: $BRANCH_NAME_FEATURE1
+    KUBE_CONTEXT: $KUBE_CONTEXT_FEATURE1
+  extends: [.kube-context, .deploy_dev ]
 
 #deploy:
 #  stage: deploy
