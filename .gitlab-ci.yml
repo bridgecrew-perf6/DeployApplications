@@ -234,19 +234,21 @@ patch:
 .ek_demo:
   stage: deploy
   rules:
-  - if: '$CI_ENVIRONMENT_NAME != "james"'
+  - if: '$CI_ENVIRONMENT_NAME != "james" || $test != "james"'
     when: never
   - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
   script: echo "If you see this message, it worked"
 
 test_for_james:
+  variables:
+    test: james
   environment:
-    name: "james"
+    name: james
   extends: [.ek_demo]
 
 test_this_should_not_run:
   environment:
-    name: "eva"
+    name: eva
   extends: [.ek_demo]
 
 deploy_main:
