@@ -168,7 +168,8 @@ deploy_demo:
 #  rules:
 #  - !reference [.build_vars, rules]
   rules:
-#  - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+  - if: ! $CI_COMMIT_BRANCH || $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+    when: never
   - !reference [.build_vars, rules]
   script:
     - set -x
