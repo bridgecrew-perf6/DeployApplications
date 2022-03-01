@@ -166,7 +166,7 @@ patch:
     for dir in ${CI_PROJECT_DIR}/applications/*/
     do
         APPLICATION=$(basename ${dir%*/})
-        IMAGE_REPO="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TAG}"
+        IMAGE_REPO="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TYPE}"
         docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
         echo $IMAGE_REPO, $IMAGE_EXISTS
     done
