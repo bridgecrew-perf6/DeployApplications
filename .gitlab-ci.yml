@@ -232,6 +232,7 @@ patch:
 #  - *deploy_applications
 
 .ek_demo:
+  stage: deploy
   rules:
   - if: '$CI_ENVIRONMENT_NAME != "james"'
     when: never
