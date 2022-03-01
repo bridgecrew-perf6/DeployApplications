@@ -240,11 +240,13 @@ patch:
   script: echo "If you see this message, it worked"
 
 test_for_james:
-  environment: james
+  environment:
+    name: james
   extends: [.ek_demo]
 
 test_this_should_not_run:
-  environment: eva
+  environment:
+    name: eva
   extends: [.ek_demo]
 
 deploy_main:
