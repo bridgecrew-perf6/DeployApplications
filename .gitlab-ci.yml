@@ -216,7 +216,7 @@ patch:
     when: never
 #  - if: $BRANCH_NAME == $CI_COMMIT_BRANCH && $CI_ENVIRONMENT_NAME == 'test' # || $CI_ENVIRONMENT_NAME == 'test' || $CI_ENVIRONMENT_NAME == "test")
 #    when: never
-  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
+  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     when: never
   - !reference [.build_vars, rules]
   script:
