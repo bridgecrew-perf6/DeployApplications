@@ -214,7 +214,7 @@ patch:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH && ($CI_ENVIRONMENT_NAME != 'test' || $CI_ENVIRONMENT_NAME != "test") # || $CI_ENVIRONMENT_NAME == 'test' || $CI_ENVIRONMENT_NAME == "test")
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH && BRANCH_NAME != 'reserved_for_mr' # || GitLab issue: Not working: $CI_ENVIRONMENT_NAME != 'test'
     when: never
   - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     when: never
