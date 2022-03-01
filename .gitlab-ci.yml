@@ -206,6 +206,8 @@ patch:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
+  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH
+    when: never
   - !reference [.build_vars, rules]
   script:
   - set -x
@@ -220,6 +222,8 @@ patch:
 
 deploy_main:
   environment: demo
+  variables:
+    BRANCH_NAME: 'main'
   extends: [.deploy ]
 
 deploy_feature1:
@@ -229,6 +233,12 @@ deploy_feature1:
     KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
   extends: [.deploy ]
 
+deploy_feature2:
+  environment: development
+  variables:
+    BRANCH_NAME: 'test2' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
+    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
+  extends: [.deploy ]
 
 #deploy:
 #  stage: deploy
