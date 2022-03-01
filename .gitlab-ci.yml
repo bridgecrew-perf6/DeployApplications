@@ -6,16 +6,13 @@ variables:
   SECRET: regcred # used for the secret to access Images stored in Gitlab from the GKE
   CONTAINER_REGISTRY: "registry.gitlab.com"
 
-  APP_PATH: ${CI_PROJECT_NAMESPACE} # Namespace of the Projects with Application Images. Assumption: All of them are under same hierarchy with ProjectName==ApplicationName. In this example all Applications are in the sane namespace as this file.
-  KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-
+  APPLICATION_PATH: ${CI_PROJECT_NAMESPACE} #Path to the deployment images. In this case they are same project Namespace
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
-  #Sharing same Agent, but could use different agents
-  KUBE_CONTEXT_DEV: $KUBE_CONTEXT
-  KUBE_CONTEXT_DEMO: $KUBE_CONTEXT
-  KUBE_CONTEXT_TEST: $KUBE_CONTEXT
+  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
-  APP_REPO: ${CONTAINER_REGISTRY}/${APPLICATION_PATH}
+  APPLICATION_REPO: ${CONTAINER_REGISTRY}/${APPLICATION_PATH}
 
 stages:
 - deploy
