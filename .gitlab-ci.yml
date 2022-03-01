@@ -161,6 +161,7 @@ patch:
 - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
 deploy_demo:
+  environment: demo
   stage: deploy
   variables:
     APPLICATION_REPO: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa
@@ -176,6 +177,7 @@ deploy_demo:
 #    - IMAGE_REPO=${APPLICATION_REPO}/$RELEASE_TAG_PREFIX
 #    - NAMESPACE=${DEMO_ENV_NAME}
     - echo $NAMESPACE
+    - echo $IMAGE_REPO
 #    - *containerExists
 #    - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
