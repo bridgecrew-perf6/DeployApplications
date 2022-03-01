@@ -11,10 +11,6 @@ variables:
 
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   #Sharing same Agent, but could use different agents
-
-  KUBE_CONTEXT_FEATURE1: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-  BRANCH_NAME_FEATURE1: "test1"
-
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
@@ -27,9 +23,9 @@ image: google/cloud-sdk
 
 .kube-context:
   before_script:
-    - echo "Setting KUBE_CONTEXT to $KUBE_CONTEXT"
-    - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
-    - kubectl config current-context
+  - echo "Setting KUBE_CONTEXT to $KUBE_CONTEXT"
+  - if [ -n "$KUBE_CONTEXT" ]; then kubectl config use-context "$KUBE_CONTEXT"; fi
+  - kubectl config current-context
 
 
 .cluster_patch: &cluster_patch #TODO only patch Image
@@ -87,11 +83,9 @@ patch:
   - *prepare_cluster
   - *cluster_patch
   rules:
-    - if: '$PIPELINE_TRIGGERED == null'
-      when: never
-    - !reference [.deploy, rules]
-
-
+  - if: '$PIPELINE_TRIGGERED == null'
+    when: never
+  - !reference [.deploy, rules]
 
 #check_image_exists:
 #  image: debian:buster
@@ -107,38 +101,38 @@ patch:
 #  rules:
 #  - !reference [.deploy, rules]
 
-.deploy:
+.deployold:
   rules:
-    - !reference [.build_vars, rules]
-    - if: '$KUBE_CONTEXT == null'
-      when: never
+  - !reference [.build_vars, rules]
+  - if: '$KUBE_CONTEXT == null'
+    when: never
   script:
-    - set -x
-    - *echo
-    - *prepare_cluster
-    - echo IMAGE_TYPE=$IMAGE_TYPE
-    - kubectl get pods -n "$NAMESPACE"
-    - kubectl config view
-    - kubectl config current-context
-    - |
-      for dir in ${CI_PROJECT_DIR}/applications/*/
-      do
-          APPLICATION_NAME=$(basename ${dir%*/})
-          if [ -f errors ]; then rm errors; fi
-          IMAGE=${APPLICATION_REPO}/${APPLICATION_NAME}/${CI_COMMIT_REF_SLUG-:}/${IMAGE_TYPE}
+  - set -x
+  - *echo
+  - *prepare_cluster
+  - echo IMAGE_TYPE=$IMAGE_TYPE
+  - kubectl get pods -n "$NAMESPACE"
+  - kubectl config view
+  - kubectl config current-context
+  - |
+    for dir in ${CI_PROJECT_DIR}/applications/*/
+    do
+        APPLICATION_NAME=$(basename ${dir%*/})
+        if [ -f errors ]; then rm errors; fi
+        IMAGE=${APPLICATION_REPO}/${APPLICATION_NAME}/${CI_COMMIT_REF_SLUG-:}/${IMAGE_TYPE}
 
 
-          echo $FAILED
-          if [ -n "$FAILED" ]; then
-            echo "Image $IMAGE_TAG does not exist, will try the Fall back Image option"
-          else
-            echo Deploying ${IMAGE_TAG}
-          fi
+        echo $FAILED
+        if [ -n "$FAILED" ]; then
+          echo "Image $IMAGE_TAG does not exist, will try the Fall back Image option"
+        else
+          echo Deploying ${IMAGE_TAG}
+        fi
 
-          APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-          APPLICATION=$APPLICATION IMAGE=$IMAGE_TAG KUBE_NAMESPACE=$NAMESPACE bash $APPLY
-      done
-    - kubectl get pods -n "$NAMESPACE"
+        APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
+        APPLICATION=$APPLICATION IMAGE=$IMAGE_TAG KUBE_NAMESPACE=$NAMESPACE bash $APPLY
+    done
+  - kubectl get pods -n "$NAMESPACE"
 
 #deploy:
 #  environment: $ENVIRONMENT
@@ -159,33 +153,33 @@ patch:
 #    - !reference [.deploy, rules]
 
 .deploy_applications: &deploy_applications
-  - *echo
-  - *prepare_cluster
-  - kubectl get pods -n "$NAMESPACE"
-  - kubectl config view
-  - kubectl config current-context
-  - echo $IMAGE_TYPE
-  # Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
-  # via https://gitlab.com/gitlab-org/gitlab-foss/issues/26866#note_97609397
-  - mkdir -p ~/.docker
-  - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-  -  |
-    for dir in ${CI_PROJECT_DIR}/applications/*/
-    do
-        APP_NAME=$(basename ${dir%*/})
-        IMAGE="${APP_REPO}/${APP_NAME}/${REPO_SUB/:-}${IMAGE_TYPE}"
-        IMAGE_RELEASED="${APP_REPO}/${APP_NAME}/${RELEASED}"
-        echo IMAGE=$IMAGE, IMAGE_RELEASED=$IMAGE_RELEASED
-        docker manifest inspect $IMAGE > /dev/null 2>&1 && IMAGE_EXISTS=0 || IMAGE_EXISTS=1
-        echo $IMAGE, $IMAGE_EXISTS
-        if [ $IMAGE_EXISTS -eq '1' ]; then
-            docker manifest inspect $IMAGE_RELEASED > /dev/null 2>&1 && IMAGE_EXISTS=0 || IMAGE_EXISTS=1
-            if [ $IMAGE_EXISTS -eq '0' ]; then IMAGE=$IMAGE_RELEASED; fi
-        fi
-        echo $IMAGE, $IMAGE_EXISTS
-    done
-  - kubectl get pods -n "$NAMESPACE"
+- *echo
+- *prepare_cluster
+- kubectl get pods -n "$NAMESPACE"
+- kubectl config view
+- kubectl config current-context
+- echo $IMAGE_TYPE
+# Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
+# via https://gitlab.com/gitlab-org/gitlab-foss/issues/26866#note_97609397
+- mkdir -p ~/.docker
+- "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
+- docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+-  |
+  for dir in ${CI_PROJECT_DIR}/applications/*/
+  do
+      APP_NAME=$(basename ${dir%*/})
+      IMAGE="${APP_REPO}/${APP_NAME}/${REPO_SUB:-}${IMAGE_TYPE}"
+      IMAGE_RELEASED="${APP_REPO}/${APP_NAME}/${RELEASED}"
+      echo IMAGE=$IMAGE, IMAGE_RELEASED=$IMAGE_RELEASED
+      docker manifest inspect $IMAGE > /dev/null 2>&1 && IMAGE_EXISTS=0 || IMAGE_EXISTS=1
+      echo $IMAGE, $IMAGE_EXISTS
+      if [ $IMAGE_EXISTS -eq '1' ]; then
+          docker manifest inspect $IMAGE_RELEASED > /dev/null 2>&1 && IMAGE_EXISTS=0 || IMAGE_EXISTS=1
+          if [ $IMAGE_EXISTS -eq '0' ]; then IMAGE=$IMAGE_RELEASED; fi
+      fi
+      echo $IMAGE, $IMAGE_EXISTS
+  done
+- kubectl get pods -n "$NAMESPACE"
 
 .containerExists: &containerExists
 # Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
@@ -196,47 +190,45 @@ patch:
 - docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
 - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
-deploy_demo:
-  extends: [.kube-context ]
-  environment: demo
-  stage: deploy
+.deploy_rules:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $CI_COMMIT_BRANCH == null || $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+  - if: $CI_COMMIT_BRANCH == null
     when: never
   - !reference [.build_vars, rules]
-  script:
-    - set -x
-    - echo $NAMESPACE
-    - echo $KUBE_CONTEXT
-    - *deploy_applications
 
-
-.deploy_dev:
+.deploy:
   stage: deploy
-  extends: [.kube-context ]
-  environment: development
-  rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - if: $CI_COMMIT_BRANCH == null || $CI_COMMIT_BRANCH != $BRANCH_NAME
-    when: never
-  - !reference [.build_vars, rules]
   variables:
-    REPO_SUB: $CI_COMMIT_BRANCH
-    KUBE_CONTEXT: $KUBE_CONTEXT_DEV
+    REPO_SUB: ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}/ #for the feature, Application images are stored in the 'feature_name path
+  #  extends: [.kube-context ]
+  rules:
+  - if: $PIPELINE_TRIGGERED
+    when: never
+  - !reference [.build_vars, rules]
   script:
   - set -x
-  - echo $NAMESPACE
-  - echo $KUBE_CONTEXT
-  - *deploy_applications
+  - echo REPO_SUB=$REPO_SUB
+  - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
+  - echo CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+  - echo NAMESPACE=$NAMESPACE
+  - echo KUBE_CONTEXT_DEV=$KUBE_CONTEXT_DEV
+  - echo BRANCH_NAME=$BRANCH_NAME
+  - echo $EMPTY
+#  - *deploy_applications
+
+deploy_main:
+  environment: demo
+  extends: [.deploy ]
 
 deploy_feature1:
+  environment: development
   variables:
-    BRANCH_NAME: $BRANCH_NAME_FEATURE1
-    KUBE_CONTEXT: $KUBE_CONTEXT_FEATURE1
-  extends: [.kube-context, .deploy_dev ]
+    BRANCH_NAME: 'test1' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
+    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
+  extends: [.deploy ]
+
 
 #deploy:
 #  stage: deploy
