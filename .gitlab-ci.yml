@@ -214,11 +214,12 @@ patch:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
+  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH &&  $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME != $CI_DEFAULT_BRANCH # && $CI_ENVIRONMENT_NAME != "test"
     when: never
   - !reference [.build_vars, rules]
   script:
   - set -x
+  - echo $CI_ENVIRONMENT_NAME
   - echo REPO_SUB=$REPO_SUB
   - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
   - echo CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
@@ -230,6 +231,12 @@ patch:
 
 deploy_main:
   environment: demo
+  variables:
+    BRANCH_NAME: 'main'
+  extends: [.deploy ]
+
+deploy_mr:
+  environment: test
   variables:
     BRANCH_NAME: 'main'
   extends: [.deploy ]
