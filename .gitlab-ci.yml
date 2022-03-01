@@ -205,7 +205,7 @@ patch:
   - if: $CI_COMMIT_BRANCH == null
     when: never
   - !reference [.build_vars, rules]
-  -
+
 .deploy:
   stage: deploy
   variables:
