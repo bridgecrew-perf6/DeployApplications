@@ -11,7 +11,10 @@ variables:
 
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   #Sharing same Agent, but could use different agents
-  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+
+  KUBE_CONTEXT_FEATURE1: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  FEATURE1_BRANCH_NAME: "test1"
+
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
@@ -207,17 +210,28 @@ deploy_demo:
   - !reference [.build_vars, rules]
   script:
     - set -x
-#    - NAMESPACE=${DEMO_ENV_NAME}
     - echo $NAMESPACE
     - echo $KUBE_CONTEXT
     - *deploy_applications
-#    - *containerExists
-#    - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
-#    - echo IMAGE_REPO=$IMAGE_REPO
-#    - export image_repository=${APPLICATION_REPO:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
-#    - echo $image_repository
-
+deploy_feature1:
+  extends: [.kube-context ]
+  environment: development
+  stage: deploy
+  rules:
+  - if: $PIPELINE_TRIGGERED
+    when: never
+  - if: $CI_COMMIT_BRANCH == null || $CI_COMMIT_BRANCH != $FEATURE1_BRANCH_NAME
+    when: never
+  - !reference [.build_vars, rules]
+    variables:
+      REPO_SUB: $CI_COMMIT_BRANCH
+      KUBE_CONTEXT: $KUBE_CONTEXT_FEATURE1
+  script:
+  - set -x
+  - echo $NAMESPACE
+  - echo $KUBE_CONTEXT
+  - *deploy_applications
 
 #deploy:
 #  stage: deploy
