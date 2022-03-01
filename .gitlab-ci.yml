@@ -190,7 +190,7 @@ patch:
 - docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
 - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
-.deploy_rules:
+.commit_rules:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
@@ -198,6 +198,14 @@ patch:
     when: never
   - !reference [.build_vars, rules]
 
+.mr_rules:
+  rules:
+  - if: $PIPELINE_TRIGGERED
+    when: never
+  - if: $CI_COMMIT_BRANCH == null
+    when: never
+  - !reference [.build_vars, rules]
+  -
 .deploy:
   stage: deploy
   variables:
@@ -206,7 +214,7 @@ patch:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH || $CI_PIPELINE_SOURCE != "merge_request_event"
+  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     when: never
   - !reference [.build_vars, rules]
   script:
