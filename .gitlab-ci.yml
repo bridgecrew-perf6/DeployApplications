@@ -208,15 +208,13 @@ patch:
 
 .deploy:
   stage: deploy
-  variables:
-    REPO_SUB: ${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}/ #for the feature, Application images are stored in the 'feature_name path
   #  extends: [.kube-context ]
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH #exclude MR not to the main branch
     when: never
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $BRANCH_NAME != "reserved_for_mr" # GitLab issue: Not working with following check :$CI_ENVIRONMENT_NAME != "test"
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $BRANCH_NAME != null # GitLab issue: Not working when using a dynamic reference, need to copy/past constant string
     when: never
   - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
     when: never
@@ -224,32 +222,14 @@ patch:
   script:
   - set -x
   - echo ENVIRONMENT=$CI_ENVIRONMENT_NAME
-  - echo REPO_SUB=$REPO_SUB
+  - export REPO_SUB=${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}/
   - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
-  - echo CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+  - echo CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME #for the feature, Application images are stored in the 'feature_name path
   - echo NAMESPACE=$NAMESPACE
   - echo TEST_EVA=$TEST_EVA
 #  - *deploy_applications
 
-.ek_demo:
-  stage: deploy
-  rules:
-  - if: '$CI_ENVIRONMENT_NAME != "james" || $test != "james"'
-    when: never
-  - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
-  script: echo "If you see this message, it worked"
 
-test_for_james:
-  variables:
-    test: james
-  environment:
-    name: james
-  extends: [.ek_demo]
-
-test_this_should_not_run:
-  environment:
-    name: eva
-  extends: [.ek_demo]
 
 deploy_main:
   environment: demo
@@ -259,8 +239,8 @@ deploy_main:
 
 deploy_mr:
   environment: test
-  variables:
-    BRANCH_NAME: 'reserved_for_mr'
+#  variables:
+#    BRANCH_NAME: 'reserved_for_mr'
   extends: [.deploy ]
 
 deploy_feature1:
