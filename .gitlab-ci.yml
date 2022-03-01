@@ -109,7 +109,7 @@ patch:
     - set -x
     - *echo
     - *prepare_cluster
-    - echo $CI_COMMIT_REF_NAME "interesting"
+    - echo IMAGE_TYPE=$IMAGE_TYPE
     - kubectl get pods -n "$NAMESPACE"
     - kubectl config view
     - kubectl config current-context
@@ -118,7 +118,7 @@ patch:
       do
           APPLICATION_NAME=$(basename ${dir%*/})
           if [ -f errors ]; then rm errors; fi
-          IMAGE_REPO=$APPLICATION_REPO/$APPLICATION_NAME/${CI_COMMIT_REF_SLUG-:}/$IMAGE_TYPE
+          IMAGE=${APPLICATION_REPO}/${APPLICATION_NAME}/${CI_COMMIT_REF_SLUG-:}/${IMAGE_TYPE}
 
 
           echo $FAILED
@@ -157,6 +157,7 @@ patch:
   - kubectl get pods -n "$NAMESPACE"
   - kubectl config view
   - kubectl config current-context
+  - echo $IMAGE_TYPE
   # Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
   # via https://gitlab.com/gitlab-org/gitlab-foss/issues/26866#note_97609397
   - mkdir -p ~/.docker
@@ -167,6 +168,7 @@ patch:
     do
         APPLICATION=$(basename ${dir%*/})
         IMAGE_REPO="${CONTAINER_REGISTRY}/${CI_PROJECT_NAMESPACE}/${APPLICATION}/${IMAGE_TYPE}"
+        echo IMAGE_REPO=$IMAGE_REPO
         docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
         echo $IMAGE_REPO, $IMAGE_EXISTS
     done
