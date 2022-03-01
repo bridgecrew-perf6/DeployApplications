@@ -206,7 +206,7 @@ patch:
   rules:
   - if: $PIPELINE_TRIGGERED
     when: never
-  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH
+  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH || $CI_PIPELINE_SOURCE != "merge_request_event"
     when: never
   - !reference [.build_vars, rules]
   script:
