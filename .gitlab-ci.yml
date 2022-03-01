@@ -160,7 +160,7 @@ patch:
 - docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
 - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
-deploy_test:
+deploy_demo:
   stage: deploy
   variables:
     APPLICATION_REPO: registry.gitlab.com/${CI_PROJECT_NAMESPACE}/applicationa
@@ -178,8 +178,8 @@ deploy_test:
 #    - echo IMAGE_REPO=$IMAGE_REPO
 #    - export image_repository=${APPLICATION_REPO:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
 #    - echo $image_repository
-  environment:
-    name: $ENVIRONMENT
+  rules:
+  - if: $ENVIRONMENT == 'demo'
 #deploy:
 #  stage: deploy
 #  environment: $ENVIRONMENT
