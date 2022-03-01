@@ -241,12 +241,12 @@ patch:
 
 test_for_james:
   environment:
-    name: james
+    name: "james"
   extends: [.ek_demo]
 
 test_this_should_not_run:
   environment:
-    name: eva
+    name: "eva"
   extends: [.ek_demo]
 
 deploy_main:
