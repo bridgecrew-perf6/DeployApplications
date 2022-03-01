@@ -224,9 +224,9 @@ deploy_feature1:
   - if: $CI_COMMIT_BRANCH == null || $CI_COMMIT_BRANCH != $FEATURE1_BRANCH_NAME
     when: never
   - !reference [.build_vars, rules]
-    variables:
-      REPO_SUB: $CI_COMMIT_BRANCH
-      KUBE_CONTEXT: $KUBE_CONTEXT_FEATURE1
+  variables:
+    REPO_SUB: $CI_COMMIT_BRANCH
+    KUBE_CONTEXT: $KUBE_CONTEXT_FEATURE1
   script:
   - set -x
   - echo $NAMESPACE
