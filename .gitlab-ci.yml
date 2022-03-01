@@ -231,6 +231,20 @@ patch:
   - echo TEST_EVA=$TEST_EVA
 #  - *deploy_applications
 
+.ek_demo:
+  rules:
+  - if: '$CI_ENVIRONMENT_NAME != "james"'
+    when: never
+  script: echo "If you see this message, it worked"
+
+test_for_james:
+  environment: james
+  extends: [.ek_demo]
+
+test_this_should_not_run:
+  environment: eva
+  extends: [.ek_demo]
+
 deploy_main:
   environment: demo
   variables:
