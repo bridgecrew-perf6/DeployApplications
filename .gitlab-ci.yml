@@ -115,6 +115,7 @@ patch:
       echo $IMAGE, $IMAGE_EXISTS
       APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
       APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
+      kubectl get svc $APPLICATION -n "$NAMESPACE" 2>/dev/null || kubectl expose deployment $APPLICATION --port=5001 --target-port=80 -n "$NAMESPACE" --type=LoadBalancer
   done
 - kubectl get pods -n "$NAMESPACE"
 
