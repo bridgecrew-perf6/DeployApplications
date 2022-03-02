@@ -172,9 +172,9 @@ patch:
 deploy_main:
   environment: demo
   rules:
-#    - if: $PIPELINE_TRIGGERED #exclude patching triggered
-#      when: never
-    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE != "merge_request_event" #exclude when commit NOT to a main branch
+    - if: $PIPELINE_TRIGGERED #exclude patching triggered
+      when: never
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH || $CI_PIPELINE_SOURCE == "merge_request_event" #exclude when commit NOT to a main branch
       when: never
     - !reference [.build_vars, rules]
   extends: [.deploy ]
