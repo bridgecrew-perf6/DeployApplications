@@ -86,38 +86,6 @@ patch:
     when: never
   - !reference [.build_vars, rules]
 
-.deployold:
-  rules:
-  - !reference [.build_vars, rules]
-  - if: '$KUBE_CONTEXT == null'
-    when: never
-  script:
-  - set -x
-  - *echo
-  - *prepare_cluster
-  - echo IMAGE_TYPE=$IMAGE_TYPE
-  - kubectl get pods -n "$NAMESPACE"
-  - kubectl config view
-  - kubectl config current-context
-  - |
-    for dir in ${CI_PROJECT_DIR}/applications/*/
-    do
-        APPLICATION_NAME=$(basename ${dir%*/})
-        if [ -f errors ]; then rm errors; fi
-        IMAGE=${APPLICATION_REPO}/${APPLICATION_NAME}/${CI_COMMIT_REF_SLUG-:}/${IMAGE_TYPE}
-
-
-        echo $FAILED
-        if [ -n "$FAILED" ]; then
-          echo "Image $IMAGE_TAG does not exist, will try the Fall back Image option"
-        else
-          echo Deploying ${IMAGE_TAG}
-        fi
-
-        APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
-        APPLICATION=$APPLICATION IMAGE=$IMAGE_TAG KUBE_NAMESPACE=$NAMESPACE bash $APPLY
-    done
-  - kubectl get pods -n "$NAMESPACE"
 
 .deploy_applications: &deploy_applications
 - *echo
@@ -145,17 +113,12 @@ patch:
           if [ $IMAGE_EXISTS -eq '0' ]; then IMAGE=$IMAGE_RELEASED; fi
       fi
       echo $IMAGE, $IMAGE_EXISTS
+      APPLY="${CI_PROJECT_DIR}/applications/${APPLICATION}/gcp/apply.sh"
+      APPLICATION=$APPLICATION IMAGE=$IMAGE KUBE_NAMESPACE=$NAMESPACE bash $APPLY
   done
 - kubectl get pods -n "$NAMESPACE"
 
-.containerExists: &containerExists
-# Check if Container Image Exists, by setting IMAGE_EXISTS to 'true' or 'false'.
-# via https://gitlab.com/gitlab-org/gitlab-foss/issues/26866#note_97609397
-- mkdir -p ~/.docker
-- "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
-- docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-- docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
-- echo IMAGE_EXISTS=$IMAGE_EXISTS
+
 
 .deploy:
   stage: deploy
