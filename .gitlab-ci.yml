@@ -13,8 +13,7 @@ variables:
   #Sharing same Agent, but could use different agents
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-
-
+  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
 
 stages:
 - deploy
@@ -56,7 +55,7 @@ image: google/cloud-sdk
   fi
 
 .echo: &echo
-- echo $KUBE_CONTEXT
+- echo KUBE_CONTEXT=$KUBE_CONTEXT
 - echo ENVIRONMENT = $ENVIRONMENT
 - echo IMAGE = $IMAGE
 - echo NAMESPACE = $NAMESPACE
@@ -86,20 +85,6 @@ patch:
   - if: '$PIPELINE_TRIGGERED == null'
     when: never
   - !reference [.deploy, rules]
-
-#check_image_exists:
-#  image: debian:buster
-#  before_script:
-#  - apt update && apt install -y curl jq
-#  script:
-#  - export IMAGE_NAME=$IMAGE_LATEST
-#  - echo $IMAGE_LATEST
-#  - 'export IMAGE_NAME=$(echo $CI_REGISTRY_IMAGE) | cut -d "/" -f2-)'
-#  - 'export GITLAB_TOKEN=$(curl -s --user "${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}" "https://gitlab.cc-asp.fraunhofer.de/jwt/auth?offline_token=true&service=container_registry&scope=repository:${IMAGE_NAME}:pull" | jq -r ".token")'
-#  - 'if ! curl --fail -s -o /dev/null -H "Accept: application/vnd.docker.distribution.manifest.v2+json" -H "Authorization: Bearer $GITLAB_TOKEN" "https://${CI_REGISTRY}/v2/${IMAGE_NAME}/manifests/${IMAGE_TAG}"; then echo ERROR ${IMAGE_NAME}:${IMAGE_TAG} does not exist; exit 1; fi'
-#  - 'echo Deploying ${IMAGE_NAME}:${IMAGE_TAG}'
-#  rules:
-#  - !reference [.deploy, rules]
 
 .deployold:
   rules:
@@ -133,24 +118,6 @@ patch:
         APPLICATION=$APPLICATION IMAGE=$IMAGE_TAG KUBE_NAMESPACE=$NAMESPACE bash $APPLY
     done
   - kubectl get pods -n "$NAMESPACE"
-
-#deploy:
-#  environment: $ENVIRONMENT
-#  stage: deploy
-#  before_script:
-#    - apt update && apt install -y curl jq
-#    - mkdir -p ~/.docker
-#    - "echo '{\"experimental\": \"enabled\"}' > ~/.docker/config.json"
-#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-#    - docker manifest inspect $IMGNAME:$IMGTAG && exit || true
-#    - !reference [.kube-context, before_script]
-##  extends: [ .kube-context ]
-#  script:
-#    - !reference [.deploy, script]
-#  rules:
-#    - if: $PIPELINE_TRIGGERED
-#      when: never
-#    - !reference [.deploy, rules]
 
 .deploy_applications: &deploy_applications
 - *echo
@@ -190,97 +157,48 @@ patch:
 - docker manifest inspect $IMAGE_REPO > /dev/null 2>&1 && IMAGE_EXISTS=true || IMAGE_EXISTS=false
 - echo IMAGE_EXISTS=$IMAGE_EXISTS
 
-.commit_rules:
-  rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - if: $CI_COMMIT_BRANCH == null
-    when: never
-  - !reference [.build_vars, rules]
-
-.mr_rules:
-  rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - if: $CI_COMMIT_BRANCH == null
-    when: never
-  - !reference [.build_vars, rules]
-
 .deploy:
   stage: deploy
-  #  extends: [.kube-context ]
-  rules:
-  - if: $PIPELINE_TRIGGERED
-    when: never
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH #exclude MR not to the main branch
-    when: never
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $BRANCH_NAME != null # GitLab issue: Not working when using a dynamic reference, need to copy/past constant string
-    when: never
-  - if: $BRANCH_NAME != $CI_COMMIT_BRANCH && $CI_PIPELINE_SOURCE != "merge_request_event"
-    when: never
-  - !reference [.build_vars, rules]
+    extends: [.kube-context ]
   script:
   - set -x
-  - echo ENVIRONMENT=$CI_ENVIRONMENT_NAME
-  - export REPO_SUB=${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}/
+  - export ENVIRONMENT=$CI_ENVIRONMENT_NAME
   - echo CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
   - echo CI_MERGE_REQUEST_SOURCE_BRANCH_NAME=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME #for the feature, Application images are stored in the 'feature_name path
-  - echo NAMESPACE=$NAMESPACE
-  - echo TEST_EVA=$TEST_EVA
-#  - *deploy_applications
-
-
+  - export REPO_SUB=${CI_COMMIT_BRANCH:-$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}/
+  - echo REPO_SUB=$REPO_SUB
+  - *deploy_applications
 
 deploy_main:
   environment: demo
-  variables:
-    BRANCH_NAME: 'main'
+  rules:
+  - if: $PIPELINE_TRIGGERED #exclude patching triggered
+    when: never
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH #exclude when commit NOT to a main branch
+    when: never
+  - !reference [.build_vars, rules]
   extends: [.deploy ]
 
 deploy_mr:
   environment: test
-#  variables:
-#    BRANCH_NAME: 'reserved_for_mr'
+  rules:
+  - if: $PIPELINE_TRIGGERED #exclude patching triggered
+    when: never
+  - if: $CI_PIPELINE_SOURCE != "merge_request_event || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH" #exclude when NOT a MR or MR not to the main branch
+    when: never
+  - !reference [.build_vars, rules]
   extends: [.deploy ]
 
-deploy_feature1:
+deploy_dev:
   environment: development
-  variables:
-    BRANCH_NAME: 'test1' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
-    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
+  rules:
+  - if: $PIPELINE_TRIGGERED #exclude patching triggered
+    when: never
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH #exclude MR and demo
+    when: never
+  - !reference [.build_vars, rules]
   extends: [.deploy ]
 
-deploy_feature2:
-  environment: development
-  variables:
-    BRANCH_NAME: 'test2' #This does not work when using for example $BRANCH_FEATURE_FEATURE1, needs to be a static string.
-    KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"  #This does not work when using for example $KUBE_CONTEXT_FEATURE1, needs to be a static string.
-  extends: [.deploy ]
-
-#deploy:
-#  stage: deploy
-#  environment: $ENVIRONMENT
-#  extends: [.set-context ]
-#  rules:
-#  - if: $PIPELINE_TRIGGERED
-#    when: never
-#  - !reference [.build_vars, rules]
-#  - if: $ENVIRONMENT == 'demo'
-#    variables:
-#      KUBE_CONTEXT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-##  - !reference [.set-context, rules]
-#  script:
-#  - echo CI_COMMIT_REF_NAME = $CI_COMMIT_REF_NAME
-#  - echo CI_COMMIT_BRANCH = $CI_COMMIT_BRANCH
-#  - *echo
-##  - if [ $ENVIRONMENT -eq 'demo' ]; then KUBE_CONTEXT='eva'; fi
-#  - echo KUBE_CONTEXT=$KUBE_CONTEXT
-#  - *prepare_cluster
-#  - echo $CI_COMMIT_REF_NAME "interesting"
-#  - kubectl get pods -n "$NAMESPACE"
-#  - kubectl config view
-#  - kubectl config current-context
-#  -  |
 #    for dir in ${CI_PROJECT_DIR}/applications/*/
 #    do
 #        APPLICATION=$(basename ${dir%*/})
