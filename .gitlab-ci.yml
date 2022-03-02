@@ -84,7 +84,7 @@ patch:
   rules:
   - if: '$PIPELINE_TRIGGERED == null'
     when: never
-  - !reference [.deploy, rules]
+  - !reference [.build_vars, rules]
 
 .deployold:
   rules:
