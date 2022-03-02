@@ -179,15 +179,15 @@ deploy_main:
     - !reference [.build_vars, rules]
   extends: [.deploy ]
 
-deploy_mr:
-  environment: test
-  rules:
-  - if: $PIPELINE_TRIGGERED #exclude patching triggered
-    when: never
-  - if: $CI_PIPELINE_SOURCE != "merge_request_event" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH #exclude when NOT a MR or MR not to the main branch
-    when: never
-  - !reference [.build_vars, rules]
-  extends: [.deploy ]
+#deploy_mr:
+#  environment: test
+#  rules:
+#  - if: $PIPELINE_TRIGGERED #exclude patching triggered
+#    when: never
+#  - if: $CI_PIPELINE_SOURCE != "merge_request_event" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME != $CI_DEFAULT_BRANCH #exclude when NOT a MR or MR not to the main branch
+#    when: never
+#  - !reference [.build_vars, rules]
+#  extends: [.deploy ]
 
 deploy_dev:
   environment: development
