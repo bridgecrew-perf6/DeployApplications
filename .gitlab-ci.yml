@@ -102,8 +102,8 @@ patch:
 -  |
   for dir in ${CI_PROJECT_DIR}/applications/*/
   do
-      APP_NAME=$(basename ${dir%*/})
-      IMAGE="${APP_REPO}/${APP_NAME}/${REPO_SUB:-}${IMAGE_TYPE}"
+      APPLICATION=$(basename ${dir%*/})
+      IMAGE="${APPLICATION}/${APP_NAME}/${REPO_SUB:-}${IMAGE_TYPE}"
       IMAGE_RELEASED="${APP_REPO}/${APP_NAME}/${RELEASED}"
       echo IMAGE=$IMAGE, IMAGE_RELEASED=$IMAGE_RELEASED
       docker manifest inspect $IMAGE > /dev/null 2>&1 && IMAGE_EXISTS=0 || IMAGE_EXISTS=1
