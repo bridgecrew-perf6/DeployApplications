@@ -1,7 +1,11 @@
 #!/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "-----  Running deploy step ENVIRONMENT=$ENVIRONMENT APPLICATION=$APPLICATION IMAGE=$IMAGE NAMESPACE=$NAMESPACE-----"
 
+cat "$DIR/test"
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo "Running deploy step with following parameters KUBE_CONTEXT = $KUBE_CONTEXT, NAMESPACE=$NAMESPACE"
 if [ -n "$APPLICATION" ]; then
   APPLY_SCRIPT="${DIR}"/applications/"${APPLICATION}"/gcp/apply.sh
   if [ -f "${APPLY_SCRIPT}" ] ; then
@@ -13,3 +17,4 @@ else
   echo "Error, APPLICATION is not set"
 fi
 
+echo "-----  End deploy step... -----"
