@@ -3,9 +3,10 @@ include:
   file: /.gitlab/ci/.gitlab/ci/deploy.gitlab-ci.yml
 
 variables:
-  CONTAINER_REGISTRY: "registry.gitlab.com"
-  APP_PATH: ${CI_PROJECT_NAMESPACE} # Namespace of the Projects with Application Images. Assumption: All of them are under same hierarchy with ProjectName==ApplicationName. In this example all Applications are in the sane namespace as this file.
-  APP_REPO: ${CONTAINER_REGISTRY}/${APP_PATH}
+  # Path to the Namespace of the Application(s) Projects with micro-services.
+  # Assumption: All of them are under the same hierarchy and same namespace.
+  #In this example all Applications are in the same namespace as DeployApplications .
+  APPLICATION_NAMESPACE: ${CI_PROJECT_NAMESPACE}
 
   # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   #Sharing same Agent, but could use different agents
