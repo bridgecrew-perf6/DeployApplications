@@ -1,6 +1,6 @@
 include:
   project: gcp-solutions/hcls/claims-modernization/gitlab-ci
-  file: .gitlab/ci/deploy.gitlab-ci.yml
+  file: /.gitlab/ci/.gitlab/ci/deploy.gitlab-ci.yml
 
 variables:
   CONTAINER_REGISTRY: "registry.gitlab.com"
