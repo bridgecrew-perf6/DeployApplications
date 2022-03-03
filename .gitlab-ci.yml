@@ -1,6 +1,6 @@
 include:
   project: gcp-solutions/hcls/claims-modernization/gitlab-ci
-  file: /.gitlab/ci/deploy.gitlab-ci.yml
+  file: /.gitlab/ci/.deploy.gitlab-ci.yml
 
 variables:
   # Path to the Namespace of the Application(s) Projects with micro-services.
