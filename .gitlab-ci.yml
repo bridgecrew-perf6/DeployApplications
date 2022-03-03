@@ -9,9 +9,10 @@ variables:
   APPLICATION_NAMESPACE: ${CI_PROJECT_NAMESPACE}
 
   #Sharing same Agent, but could use different agents
-  KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-  KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
-  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  GITLAB_AGENT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
+  KUBE_CONTEXT_DEMO: $GITLAB_AGENT
+  KUBE_CONTEXT_TEST: $GITLAB_AGENT
+  KUBE_CONTEXT_DEV: $GITLAB_AGENT
 
 stages:
 - deploy
