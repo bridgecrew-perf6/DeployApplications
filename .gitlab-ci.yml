@@ -8,7 +8,6 @@ variables:
   #In this example all Applications are in the same namespace as DeployApplications .
   APPLICATION_NAMESPACE: ${CI_PROJECT_NAMESPACE}
 
-  # Commenting Out any of the KUBE_CONTEXT line will disable deployment into that environment.
   #Sharing same Agent, but could use different agents
   KUBE_CONTEXT_DEMO: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_TEST: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
