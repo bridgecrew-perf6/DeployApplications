@@ -12,7 +12,7 @@ variables:
   GITLAB_AGENT: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-priorauth"
   KUBE_CONTEXT_DEMO: $GITLAB_AGENT
   KUBE_CONTEXT_TEST: $GITLAB_AGENT
-  KUBE_CONTEXT_DEV: $GITLAB_AGENT
+  KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-evekhm"
 
 stages:
 - deploy
