@@ -1,6 +1,6 @@
 include:
   project: gcp-solutions/hcls/claims-modernization/gitlab-ci
-  file: .gitlab-ci-run-deploy-template.yml
+  file: .gitlab/ci/deploy.gitlab-ci.yml
 
 variables:
   CONTAINER_REGISTRY: "registry.gitlab.com"
@@ -15,6 +15,7 @@ variables:
 
 stages:
 - deploy
+- destroy
 
 
 

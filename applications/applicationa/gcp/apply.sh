@@ -7,7 +7,6 @@ cd "$GCP"/../k8s/ || exit
 
 echo "***** Applying  $APPLICATION deployment  *****"
 
-
 sed 's|__IMAGE_TAG__|'"$IMAGE"'|g;' deployment.sample.yaml > deployment.yaml
 kubectl apply -f deployment.yaml --namespace="$KUBE_NAMESPACE"
 
