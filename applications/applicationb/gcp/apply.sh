@@ -5,6 +5,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DB="CDS-Library.zip"
 ZIP="${DIR}/$DB"
 
+# Requires following settings in the Project->Settings->CI/CD
+# CDS_LIBRARY_TOKEN: Access Token generated for the access to the sources of the CDS-Library Project
+#
+# SERVICE_ACCOUNT_FILE: Jso File saved as a CI/CD Variable of type File, downloaded for the GCP project as a key of the Service Account.
 create_CDS_Library_zip(){
   echo "Creating new CDS-Library Archive ... "
   PWD=$(pwd)
@@ -28,11 +32,17 @@ create_bucket(){
 
 echo "***** Applying  $APPLICATION deployment  *****"
 echo ${CDS_LIBRARY_TOKEN} ${CI_PROJECT_DIR} $GSA_NAME $BUCKET $PROJECT_ID
+if [ -z $CDS_LIBRARY_TOKEN ]; then
+  echo "Error: CDS_LIBRARY_TOKEN is not set for access to the CDS-Library project"
+  exit 1;
+fi
 
 apt-get update && apt-get install git
 apt-get install zip unzip -q
 
-# Deploys CDS-Library
+gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --project=$PROJECT_ID
+
+# Deploys CDS-Library, requires CDS_LIBRARY_TOKEN in the Settings
 # Get CDS-Library from GitLab repo, zips and uploads into the GCP Cloud Storage Bucket
 git clone https://oauth2:$CDS_LIBRARY_TOKEN@gitlab.com/gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git ${CI_PROJECT_DIR}/../CDS-Library
 

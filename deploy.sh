@@ -24,7 +24,7 @@ get_project_id(){
 
 PROJECT_ID=$(get_project_id "$ENVIRONMENT")
 BUCKET=gs://${PROJECT_ID}-cql-test
-echo "Running deploy step with following parameters KUBE_CONTEXT = $KUBE_CONTEXT, NAMESPACE=$NAMESPACE"
+echo "Running deploy step with following parameters KUBE_CONTEXT=$KUBE_CONTEXT, NAMESPACE=$NAMESPACE"
 if [ -n "$APPLICATION" ]; then
   APPLY_SCRIPT="${DIR}"/applications/"${APPLICATION}"/gcp/apply.sh
   if [ -f "${APPLY_SCRIPT}" ] ; then
