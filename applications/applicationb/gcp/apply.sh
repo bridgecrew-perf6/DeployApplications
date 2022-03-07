@@ -22,7 +22,7 @@ create_bucket(){
       echo "Creating GCS bucket for pipeline: [$BUCKET]..." INFO
       gsutil mb -p "$PROJECT_ID" "${BUCKET}"/
   fi
-  gsutil iam ch  "serviceAccount:$GSA_NAME@$PROJECT_ID.iam.gserviceaccount.com":objectViewer "${BUCKET}"
+#  gsutil iam ch  "serviceAccount:$GSA_NAME@$PROJECT_ID.iam.gserviceaccount.com":objectViewer "${BUCKET}"
   gsutil cp "${ZIP}" "$BUCKET"/"$DB"
 }
 
