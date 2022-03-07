@@ -1,6 +1,6 @@
 #include:
-#  project: gcp-solutions/hcls/claims-modernization/gitlab-ci
-#  file: /.gitlab/ci/.deploy.gitlab-ci.yml
+  project: gcp-solutions/hcls/claims-modernization/gitlab-ci
+  file: /.gitlab/ci/.deploy.gitlab-ci.yml
 
 variables:
   # Path to the Namespace of the Application(s) Projects with micro-services.
@@ -19,16 +19,16 @@ stages:
 - destroy
 - test
 
-test:
-  image: google/cloud-sdk
-  #before_script: *gcloud
-  before_script:
-  - apt-get update && apt-get install git
-  stage: test
-  script:
-  - docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
-  - cat $HOME/.docker/config.json
-  - git clone https://oauth2:$CDS_LIBRARY_TOKEN@gitlab.com/gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git ${CI_PROJECT_DIR}/../CDS-Library
+#test:
+#  image: google/cloud-sdk
+#  #before_script: *gcloud
+#  before_script:
+#  - apt-get update && apt-get install git
+#  stage: test
+#  script:
+#  - docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
+#  - cat $HOME/.docker/config.json
+#  - git clone https://oauth2:$CDS_LIBRARY_TOKEN@gitlab.com/gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git ${CI_PROJECT_DIR}/../CDS-Library
 
 
 
