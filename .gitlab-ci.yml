@@ -20,6 +20,10 @@ stages:
 - test
 
 test:
+  image: google/cloud-sdk
+  #before_script: *gcloud
+  before_script:
+  - apt-get update && apt-get install git
   stage: test
   script:
   - docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
