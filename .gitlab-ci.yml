@@ -17,6 +17,13 @@ variables:
 stages:
 - deploy
 - destroy
+- test
+
+test:
+  stage: test
+  script:
+  - docker login -u $CI_DEPLOY_USER -p $CI_DEPLOY_PASSWORD $CI_REGISTRY
+  - git clone https://oauth2:$CI_DEPLOY_PASSWORD@gitlab.com/gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git ${CI_PROJECT_DIR}/../CDS-Library
 
 
 
