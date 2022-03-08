@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -e # Exit if error is detected during pipeline execution
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DB="CDS-Library.zip"
-ZIP="${DIR}/$DB"
-
+CDS_Library_PATH="gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git"
+CDS_Library_NAME=$(basename "${CDS_Library_PATH}")
+ZIP="${CI_PROJECT_DIR}/$DB"
 # Requires following settings in the Project->Settings->CI/CD
 # CDS_LIBRARY_TOKEN: Access Token generated for the access to the sources of the CDS-Library Project
 #
@@ -13,8 +13,8 @@ create_CDS_Library_zip(){
   echo "Creating new CDS-Library Archive ... "
   PWD=$(pwd)
 
-  cd "$DIR"/..
-  zip --exclude '*.git*' -r -q "$ZIP" CDS-Library
+  cd "${CI_PROJECT_DIR}"/..
+  zip --exclude '*.git*' -r -q "$DB" "${CDS_Library_NAME}"
   cd "$PWD" || exit
 }
 
@@ -40,8 +40,10 @@ gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --projec
 
 # Deploys CDS-Library, requires CDS_LIBRARY_TOKEN in the Settings
 # Get CDS-Library from GitLab repo, zips and uploads into the GCP Cloud Storage Bucket
-git clone https://"${CI_DEPLOY_USER}":"${CI_DEPLOY_PASSWORD}"@gitlab.com/gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git ${CI_PROJECT_DIR}/../CDS-Library
+git clone https://"${CI_DEPLOY_USER}":"${CI_DEPLOY_PASSWORD}"@gitlab.com/${CDS_Library_PATH} "${CI_PROJECT_DIR}/../$(basename "${CDS_Library_PATH}")"
+
 create_bucket
+
 create_CDS_Library_zip
 #
 #GSA_NAME=$GSA_NAME PROJECT_ID=$PROJECT_ID BUCKET=$BUCKET bash ${CI_PROJECT_DIR}/deploy_CDS_Library.sh
