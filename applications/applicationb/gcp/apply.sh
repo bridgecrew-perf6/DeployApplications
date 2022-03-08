@@ -41,9 +41,10 @@ gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --projec
 # Get CDS-Library from GitLab repo, zips and uploads into the GCP Cloud Storage Bucket
 git clone https://"${CI_DEPLOY_USER}":"${CI_DEPLOY_PASSWORD}"@gitlab.com/${CDS_Library_PATH} "${CI_PROJECT_DIR}/$(basename "${CDS_Library_PATH}")"
 
+create_CDS_Library_zip
+
 create_bucket
 
-create_CDS_Library_zip
 #
 #GSA_NAME=$GSA_NAME PROJECT_ID=$PROJECT_ID BUCKET=$BUCKET bash ${CI_PROJECT_DIR}/deploy_CDS_Library.sh
 
