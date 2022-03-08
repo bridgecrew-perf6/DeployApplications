@@ -44,7 +44,7 @@ gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --projec
 
 # Deploys CDS-Library, requires CDS_LIBRARY_TOKEN in the Settings
 # Get CDS-Library from GitLab repo, zips and uploads into the GCP Cloud Storage Bucket
-git clone https://${CI_DEPLOY_USER}:${CI_DEPLOY_PASSWORD}@gitlab.com/gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git ${CI_PROJECT_DIR}/../CDS-Library
+git clone https://"${CI_DEPLOY_USER}":"${CI_DEPLOY_PASSWORD}"@gitlab.com/gcp-solutions/hcls/claims-modernization/pa-ref-impl/CDS-Library.git ${CI_PROJECT_DIR}/../CDS-Library
 create_bucket
 create_CDS_Library_zip
 #
