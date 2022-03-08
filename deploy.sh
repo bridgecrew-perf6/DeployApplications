@@ -7,7 +7,6 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_ID_TEST="gitlab-demo-342103"
 PROJECT_ID_DEMO="gitlab-demo-342103"
 PROJECT_ID_DEV="gitlab-demo-342103"
-BUCKET="gs://PROJECT_ID-crd"
 
 get_project_id(){
   ENVIRONMENT=$1
@@ -24,6 +23,7 @@ get_project_id(){
 
 PROJECT_ID=$(get_project_id "$ENVIRONMENT")
 BUCKET=gs://${PROJECT_ID}-cql-test
+
 echo "Running deploy step with following parameters KUBE_CONTEXT=$KUBE_CONTEXT, NAMESPACE=$NAMESPACE"
 if [ -n "$APPLICATION" ]; then
   APPLY_SCRIPT="${DIR}"/applications/"${APPLICATION}"/gcp/apply.sh

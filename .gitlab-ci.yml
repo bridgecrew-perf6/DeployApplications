@@ -5,7 +5,7 @@ include:
 variables:
   # Path to the Namespace of the Application(s) Projects with micro-services.
   # Assumption: All of them are under the same hierarchy and same namespace.
-  #In this example all Applications are in the same namespace as DeployApplications .
+  # In this example all Applications are in the same namespace as DeployApplications .
   APPLICATION_NAMESPACE: ${CI_PROJECT_NAMESPACE}
 
   #Sharing same Agent, but could use different agents
@@ -13,6 +13,7 @@ variables:
   KUBE_CONTEXT_DEMO: $GITLAB_AGENT
   KUBE_CONTEXT_TEST: $GITLAB_AGENT
   KUBE_CONTEXT_DEV: "gcp-solutions/hcls/claims-modernization/gitlab-test-examples/gitlab-gke:gitlab-agent-evekhm"
+
 
 stages:
 - deploy
