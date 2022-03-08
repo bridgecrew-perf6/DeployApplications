@@ -2,8 +2,13 @@
 set -e # Exit if error is detected during pipeline execution
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PATH=$(dirname "${DIR}")
-APPLICATION=$(basename  "${PATH}")
+
+
+if [ -z "$APPLICATION" ]; then
+  APPLICATION_PATH=$(dirname "${DIR}")
+  APPLICATION=$(basename "${APPLICATION_PATH}")
+fi
+
 PROJECT_PATH="${APPLICATION_NAMESPACE}/${APPLICATION}"
 
 echo APPLICATION=$APPLICATION
