@@ -32,10 +32,6 @@ create_bucket(){
 
 echo "***** Applying  $APPLICATION deployment  *****"
 echo ${CI_PROJECT_DIR} $GSA_NAME $BUCKET $PROJECT_ID
-if [ -z $CDS_LIBRARY_TOKEN ]; then
-  echo "Error: CDS_LIBRARY_TOKEN is not set for access to the CDS-Library project"
-  exit 1;
-fi
 
 apt-get update && apt-get install git
 apt-get install zip unzip -q
