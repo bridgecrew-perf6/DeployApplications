@@ -5,6 +5,9 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 APPLICATION=$(dirname "${DIR}")
 PROJECT_PATH="${APPLICATION_NAMESPACE}/${APPLICATION}"
 
+echo APPLICATION=$APPLICATION
+echo PROJECT_PATH=$PROJECT_PATH
+
 DB="$APPLICATION".zip
 ZIP="${CI_PROJECT_DIR}/$DB"
 # Requires following settings in the Project->Settings->CI/CD
