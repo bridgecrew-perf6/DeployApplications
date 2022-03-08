@@ -11,11 +11,10 @@ ZIP="${CI_PROJECT_DIR}/$DB"
 # SERVICE_ACCOUNT_FILE: Jso File saved as a CI/CD Variable of type File, downloaded for the GCP project as a key of the Service Account.
 create_CDS_Library_zip(){
   echo "Creating new CDS-Library Archive ... "
-  PWD=$(pwd)
+  zip --exclude '*.git*' -r -q "${ZIP}" "${CDS_Library_NAME}"
+  pwd
+  ls
 
-  cd "${CI_PROJECT_DIR}"/..
-  zip --exclude '*.git*' -r -q "$DB" "${CDS_Library_NAME}"
-  cd "$PWD" || exit
 }
 
 create_bucket(){
@@ -40,7 +39,7 @@ gcloud auth activate-service-account --key-file ${SERVICE_ACCOUNT_FILE} --projec
 
 # Deploys CDS-Library, requires CDS_LIBRARY_TOKEN in the Settings
 # Get CDS-Library from GitLab repo, zips and uploads into the GCP Cloud Storage Bucket
-git clone https://"${CI_DEPLOY_USER}":"${CI_DEPLOY_PASSWORD}"@gitlab.com/${CDS_Library_PATH} "${CI_PROJECT_DIR}/../$(basename "${CDS_Library_PATH}")"
+git clone https://"${CI_DEPLOY_USER}":"${CI_DEPLOY_PASSWORD}"@gitlab.com/${CDS_Library_PATH} "${CI_PROJECT_DIR}/$(basename "${CDS_Library_PATH}")"
 
 create_bucket
 
