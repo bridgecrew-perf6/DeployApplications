@@ -11,6 +11,8 @@ ZIP="${CI_PROJECT_DIR}/$DB"
 # SERVICE_ACCOUNT_FILE: Jso File saved as a CI/CD Variable of type File, downloaded for the GCP project as a key of the Service Account.
 create_CDS_Library_zip(){
   echo "Creating new CDS-Library Archive ... "
+  pwd
+  ls
   zip --exclude '*.git*' -r -q "${ZIP}" "${CDS_Library_NAME}"
   pwd
   ls
